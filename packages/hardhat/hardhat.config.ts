@@ -133,10 +133,28 @@ const config: HardhatUserConfig = {
       url: "https://forno.celo-sepolia.celo-testnet.org/",
       accounts: [deployerPrivateKey],
     },
+    robinhoodTestnet: {
+      url: `https://rpc.testnet.chain.robinhood.com`,
+      accounts: [deployerPrivateKey],
+      chainId: 46630,
+    },
   },
   // Configuration for harhdat-verify plugin
   etherscan: {
-    apiKey: `${etherscanApiKey}`,
+    apiKey: {
+      robinhoodTestnet: "empty", // Blockscout doesn't require an API key
+      ...({ default: etherscanApiKey } as Record<string, string>),
+    },
+    customChains: [
+      {
+        network: "robinhoodTestnet",
+        chainId: 46630,
+        urls: {
+          apiURL: "https://explorer.testnet.chain.robinhood.com/api",
+          browserURL: "https://explorer.testnet.chain.robinhood.com",
+        },
+      },
+    ],
   },
   // Configuration for etherscan-verify from hardhat-deploy plugin
   verify: {

@@ -126,3 +126,44 @@ yarn start:dev
 ```
 
 For API performance testing and detailed response time metrics, see [API Performance Testing](./packages/api/tools/README.md).
+
+## Deploying to Robinhood Chain Testnet
+
+Robinhood Chain Testnet is an Arbitrum Orbit L2 on Ethereum (Chain ID: `46630`). The network is already configured in this repo.
+
+### Network Details
+
+| Parameter       | Value                                          |
+| --------------- | ---------------------------------------------- |
+| Chain ID        | `46630`                                        |
+| RPC (public)    | `https://rpc.testnet.chain.robinhood.com`      |
+| RPC (Alchemy)   | `https://robinhood-testnet.g.alchemy.com/v2/<YOUR_API_KEY>` |
+| Native currency | ETH                                            |
+| Block explorer  | https://explorer.testnet.chain.robinhood.com   |
+| Faucet          | https://faucet.testnet.chain.robinhood.com     |
+
+### Steps
+
+1. **Get testnet ETH** from the [faucet](https://faucet.testnet.chain.robinhood.com) or by bridging Sepolia ETH.
+
+2. **Set your environment variables** in `packages/hardhat/.env`:
+
+```bash
+DEPLOYER_PRIVATE_KEY=0x...          # your deployer wallet private key
+ALCHEMY_API_KEY=your_alchemy_key    # recommended for reliable RPC
+```
+
+3. **Deploy contracts:**
+
+```bash
+yarn deploy --network robinhoodTestnet
+```
+
+4. **Verify contracts** on the Blockscout explorer (optional):
+
+```bash
+cd packages/hardhat
+yarn hardhat --network robinhoodTestnet etherscan-verify
+```
+
+> **Note:** Since USDC has no official deployment on Robinhood Chain Testnet yet, the deploy script will automatically deploy a `MockERC20` (mUSDC) contract and use it as the default token.

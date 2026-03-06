@@ -21,6 +21,11 @@ export const networkAddresses: Record<string, NetworkAddresses> = {
   sepolia: {
     usdc: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC on Sepolia
   },
+  // Robinhood Chain Testnet (Arbitrum Orbit L2, Chain ID: 46630)
+  // No USDC deployed yet — mock contract will be used
+  robinhoodTestnet: {
+    usdc: "0x0000000000000000000000000000000000000000",
+  },
   // Local networks (use zero address - deployer should deploy mock contracts)
   hardhat: {
     usdc: "0x0000000000000000000000000000000000000000",
@@ -39,6 +44,7 @@ export const blockTimeMilliseconds: Record<string, number> = {
   localhost: 1000, // 1 second = 1000ms
   mainnet: 12000, // 12 seconds = 12000ms
   sepolia: 12000, // 12 seconds = 12000ms
+  robinhoodTestnet: 250, // ~250ms (Arbitrum Orbit L2)
 };
 
 /**
