@@ -1,0 +1,218 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --shadow-center: 0 0 12px -2px rgb(0 0 0 / 0.05);
+  --shadow-center-dark: 0 0 12px -2px rgb(0 0 0 / 0.3);
+  --animate-pulse-fast: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-orb: orbFloat 8s ease-in-out infinite;
+  --font-sans: var(--font-unlloo), "Nunito Sans", system-ui, -apple-system, sans-serif;
+}
+
+@plugin "daisyui" {
+  themes:
+    light,
+    dark --prefersdark;
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+
+  --color-primary: #697733;
+  --color-primary-content: #fafaf8;
+  --color-secondary: #7d8a48;
+  --color-secondary-content: #fafaf8;
+  --color-accent: #99a665;
+  --color-accent-content: #fafaf8;
+  --color-neutral: #3a401f;
+  --color-neutral-content: #fafaf8;
+  --color-base-100: #f0f0e8;
+  --color-base-200: #e5e5d8;
+  --color-base-300: #d0d0c0;
+  --color-base-content: #2d3319;
+  --color-info: #7d8a48;
+  --color-success: #5a9a6f;
+  --color-warning: #d4a74e;
+  --color-error: #d65745;
+
+  --radius-field: 9999rem;
+  --radius-box: 1rem;
+  --radius-btn: 0.75rem;
+}
+
+@plugin "daisyui/theme" {
+  name: "dark";
+
+  --color-primary: #8fb84a;
+  --color-primary-content: #1a1f0e;
+  --color-secondary: #a5c266;
+  --color-secondary-content: #1a1f0e;
+  --color-accent: #b8d47f;
+  --color-accent-content: #1a1f0e;
+  --color-neutral: #2a2f1a;
+  --color-neutral-content: #e8eadf;
+  --color-base-100: #1a1d12;
+  --color-base-200: #252820;
+  --color-base-300: #32352a;
+  --color-base-content: #e8eadf;
+  --color-info: #7d8a48;
+  --color-success: #6bb88a;
+  --color-warning: #e5b85c;
+  --color-error: #e67a6b;
+
+  --radius-field: 9999rem;
+  --radius-box: 1rem;
+  --radius-btn: 0.75rem;
+}
+
+@layer base {
+  * {
+    border-color: theme("colors.base.300");
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--color-base-200);
+    font-family: var(--font-unlloo), "Nunito Sans", system-ui, -apple-system, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="dark"] {
+      color-scheme: dark;
+    }
+  }
+}
+
+/* Unlloo Custom Components */
+.card-unlloo {
+  @apply rounded-2xl border border-base-300/50 bg-base-100 p-6 shadow-lg transition-all duration-300;
+}
+
+.card-unlloo:hover {
+  @apply scale-[1.01] shadow-xl;
+}
+
+.btn-unlloo {
+  @apply rounded-xl bg-primary px-6 py-3 font-semibold text-primary-content shadow-md transition-all duration-200;
+}
+
+.btn-unlloo:hover {
+  @apply bg-primary/90 shadow-lg;
+}
+
+.btn-unlloo:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-unlloo-outline {
+  @apply rounded-xl border-2 border-primary bg-transparent px-6 py-3 font-semibold text-primary transition-all duration-200;
+}
+
+.btn-unlloo-outline:hover {
+  @apply bg-primary text-primary-content;
+}
+
+.badge-unlloo {
+  @apply rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary;
+}
+
+.input-unlloo {
+  @apply rounded-xl border-2 border-base-300 bg-base-100 px-4 py-3 transition-all duration-200;
+}
+
+.input-unlloo:focus {
+  @apply border-primary outline-none;
+}
+
+.stat-card {
+  @apply rounded-2xl border border-base-300/30 bg-gradient-to-br from-base-100 to-base-200/50 p-6 shadow-sm transition-all duration-200;
+}
+
+.stat-card:hover {
+  @apply shadow-md border-base-300/50;
+}
+
+/* Dark mode specific styling for stat cards */
+[data-theme="dark"] .stat-card {
+  @apply bg-gradient-to-br from-base-200 to-base-300/30 border-base-300/40 shadow-md;
+}
+
+[data-theme="dark"] .stat-card:hover {
+  @apply border-primary/30 shadow-lg;
+}
+
+/* Stats page sections */
+.stats-section {
+  @apply rounded-3xl bg-base-100/50 p-6 border border-base-300/20;
+}
+
+[data-theme="dark"] .stats-section {
+  @apply bg-base-100/30 border-base-300/30;
+}
+
+/* Score colors */
+.score-excellent {
+  @apply text-success;
+}
+
+.score-good {
+  @apply text-primary;
+}
+
+.score-fair {
+  @apply text-warning;
+}
+
+.score-poor {
+  @apply text-error;
+}
+
+/* Provider cards */
+.provider-card {
+  @apply rounded-xl border border-base-300/50 bg-base-100 p-4 transition-all duration-200 hover:shadow-md;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0) scale(1.03);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.animate-orb {
+  animation: orbFloat 8s ease-in-out infinite;
+}

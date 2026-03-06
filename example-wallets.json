@@ -1,0 +1,69 @@
+{
+  "description": "Example wallet addresses for testing Unlloo reputation API",
+  "wallets": [
+    {
+      "name": "High Passport Score - Gitcoin Contributor",
+      "address": "0x839395e20bbB182fa440d08F850E6c7A8f6F0780",
+      "description": "Active Gitcoin contributor with 18 stamps, high ETH/NFT scores, community staker, and DAO governance participation. HumanPassport score: 54.33 (passing)"
+    },
+    {
+      "name": "Medium Passport Score - Web3 Active",
+      "address": "0x0ed6cec17f860fb54e21d154b49daefd9ca04106",
+      "description": "Web3 active user with 13 stamps including ENS, Gnosis Safe, and Gitcoin contributions. HumanPassport score: 43.85 (passing)"
+    },
+    {
+      "name": "Low Passport Score - Basic Activity",
+      "address": "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+      "description": "Basic Ethereum activity with 3 stamps (ETHDaysActive, ETHnumTransactions, ETHGasSpent). HumanPassport score: 1.20 (not passing)"
+    },
+    {
+      "name": "Vitalik Buterin",
+      "address": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      "description": "Ethereum co-founder. No Passport stamps configured. Useful for testing EthosNetwork integration."
+    },
+    {
+      "name": "Hayden Adams (Uniswap)",
+      "address": "0x50EC05ADe8280758E2077fcBC08D878D4aef79C3",
+      "description": "Uniswap founder. Well-known DeFi builder with extensive on-chain history."
+    },
+    {
+      "name": "Sassal (EthStaker)",
+      "address": "0x648aA14e4424e0825A5cE739C8C68610e143FB79",
+      "description": "Prominent Ethereum educator and staker. Active in ETH community."
+    },
+    {
+      "name": "Test Wallet - Zero Activity",
+      "address": "0x0000000000000000000000000000000000000001",
+      "description": "Minimal activity address for testing edge cases and zero-score scenarios."
+    },
+    {
+      "name": "limone.eth",
+      "address": "0x1358155a15930f89eBc787a34Eb4ccfd9720bC62",
+      "description": "Famous Web3 builder best known for his work in the Farcaster and Base ecosystems"
+    },
+    {
+      "name": "admnov.eth",
+      "address": "0x0E08d7EA5c3030650989902f5EB890Ff59BB6368",
+      "description": "Adam"
+    },
+    {
+      "name": "deca12x.eth",
+      "address": "0x04c5697Ab48a0DEC80770d008C1657b7108A7e2b",
+      "description": "not sure if this is the right address of Deca"
+    },
+    {
+      "name": "nick.eth",
+      "address": "0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5",
+      "description": "Nick Johnson, The Founder of Ethereum Name Service"
+    },
+    {
+      "name": "romispectrum.eth",
+      "address": "0x4f57c97f76E8d1C889eaA74A02E150BE1e0EDe25",
+      "description": "Romi from Unlloo"
+    }
+  ],
+  "usage": {
+    "reputation": "GET /api/v2/reputation/{address}",
+    "details": "GET /api/v2/reputation/{address}/details"
+  }
+}
