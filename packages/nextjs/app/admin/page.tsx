@@ -125,7 +125,7 @@ const AdminPage: NextPage = () => {
   // Get block time for human-readable format
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
 
   const { writeContractAsync: writeUnllooAsync, isPending: isTransactionPending } = useScaffoldWriteContract({

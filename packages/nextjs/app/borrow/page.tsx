@@ -128,7 +128,7 @@ const BorrowPage: NextPage = () => {
   // Get block time to calculate time remaining (static value, cache for longer)
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
     watch: false,
     query: {
       staleTime: 300000, // Cache for 5 minutes since this is a constant

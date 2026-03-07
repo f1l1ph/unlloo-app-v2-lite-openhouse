@@ -5,9 +5,9 @@
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
-  31337: {
+  46630: {
     MockERC20: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0xbfAce6A41B79A42c5174DaFC7054D4FF2df899b8",
       abi: [
         {
           inputs: [
@@ -386,10 +386,10 @@ const deployedContracts = {
         transfer: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         transferFrom: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       },
-      deployedOnBlock: 1,
+      deployedOnBlock: 9517488,
     },
     Unlloo: {
-      address: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+      address: "0x323BBF8f4B916982DeF5E594a975BE69dBaeD2bC",
       abi: [
         {
           inputs: [],
@@ -3035,10 +3035,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 6,
+      deployedOnBlock: 9517648,
     },
     UnllooImplementation: {
-      address: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+      address: "0x4786084CE9cda7FD7e64f723884e19564CFfaCf7",
       abi: [
         {
           inputs: [],
@@ -5684,7 +5684,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 4,
+      deployedOnBlock: 9517582,
     },
   },
   11155111: {

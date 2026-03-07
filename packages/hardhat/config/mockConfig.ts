@@ -26,7 +26,7 @@ export const mockConfig = {
 
     // List of addresses to mint USDC to
     // Uncomment and add addresses you want to receive USDC during deployment
-    addresses: ["0x4f57c97f76E8d1C889eaA74A02E150BE1e0EDe25"],
+    addresses: ["0x4f57c97f76E8d1C889eaA74A02E150BE1e0EDe25", "0x47Cdf6c3b4c2D1D2c2dcfC9D8CbbeA3b73a5805F"],
     admin: "0x4f57c97f76E8d1C889eaA74A02E150BE1e0EDe25",
   },
 } as const;

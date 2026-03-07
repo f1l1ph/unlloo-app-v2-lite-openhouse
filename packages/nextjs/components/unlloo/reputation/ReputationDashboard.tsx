@@ -63,7 +63,7 @@ export const ReputationDashboard: React.FC = () => {
   // Get block time from contract
   const { data: blockTimeSecondsData } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
   const blockTimeSeconds = blockTimeSecondsData ? Number(blockTimeSecondsData) : 2;
 

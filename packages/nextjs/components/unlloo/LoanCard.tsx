@@ -44,7 +44,7 @@ export const LoanCard: React.FC<LoanCardProps> = ({
   // Get block time for human-readable format
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
 
   // Get remaining balance

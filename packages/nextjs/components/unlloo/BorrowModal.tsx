@@ -71,7 +71,7 @@ export const BorrowModal: React.FC<BorrowModalProps> = ({
   // Get block time for human-readable format
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
 
   // Get borrower interest rate for estimation (using current pool rate)

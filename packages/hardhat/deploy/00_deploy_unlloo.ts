@@ -27,6 +27,7 @@ const EXPECTED_CHAIN_IDS: Record<string, number> = {
   sepolia: 11155111,
   hardhat: 31337,
   localhost: 31337,
+  robinhoodTestnet: 46630,
 };
 
 // ============ Type Definitions ============
@@ -36,6 +37,7 @@ interface NetworkConfig {
   usdc: string;
   needsMocks: boolean;
   isLocalNetwork: boolean;
+  isMockTestnet: boolean;
 }
 
 interface DeploymentState {
@@ -62,13 +64,16 @@ function getNetworkConfig(networkName: string): NetworkConfig {
   const usdc = addresses.usdc;
 
   const isLocalNetwork = networkName === "hardhat" || networkName === "localhost";
-  const needsMocks = isLocalNetwork || usdc === "0x0000000000000000000000000000000000000000";
+  // Testnets with no official token deployments yet — deploy mock contracts instead
+  const isMockTestnet = networkName === "robinhoodTestnet";
+  const needsMocks = isLocalNetwork || isMockTestnet || usdc === "0x0000000000000000000000000000000000000000";
 
   return {
     blockTimeSeconds,
     usdc,
     needsMocks,
     isLocalNetwork,
+    isMockTestnet,
   };
 }
 
@@ -85,7 +90,7 @@ function isValidAddress(hre: HardhatRuntimeEnvironment, address: string): boolea
 }
 
 function validateNetworkConfig(hre: HardhatRuntimeEnvironment, networkName: string, config: NetworkConfig): void {
-  if (config.isLocalNetwork) return;
+  if (config.isLocalNetwork || config.isMockTestnet) return;
 
   if (config.usdc === "0x0000000000000000000000000000000000000000") {
     throw new Error(

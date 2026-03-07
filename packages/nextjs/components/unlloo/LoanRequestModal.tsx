@@ -179,7 +179,7 @@ export const LoanRequestModal: React.FC<LoanRequestModalProps> = ({
   // Get block time to calculate time remaining
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
 
   // Get borrower interest rate for estimation

@@ -52,7 +52,7 @@ export const LoanDetailsModal: React.FC<LoanDetailsModalProps> = ({ loan, isOpen
   // Get block time for human-readable format
   const { data: blockTimeSeconds } = useScaffoldReadContract({
     contractName: "Unlloo",
-    functionName: "BLOCK_TIME_SECONDS",
+    functionName: "blockTimeSeconds",
   });
 
   // Fetch loan details from Supabase when modal opens
