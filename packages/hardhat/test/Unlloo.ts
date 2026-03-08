@@ -84,7 +84,11 @@ describe("Unlloo", function () {
     // InterestCalculator is no longer used - removed test
 
     it("Should revert with zero token address", async function () {
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
+      const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+      const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await unllooExt.waitForDeployment();
+
+      const UnllooFactory = await ethers.getContractFactory("UnllooCore");
       const unllooImpl = await UnllooFactory.deploy({
         gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
       });
@@ -100,6 +104,7 @@ describe("Unlloo", function () {
         owner.address,
         minLoanAmount,
         maxLoanAmount,
+        await unllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -112,7 +117,11 @@ describe("Unlloo", function () {
 
     it("Should revert with zero owner address", async function () {
       const usdcAddress = await usdc.getAddress();
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
+      const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+      const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await unllooExt.waitForDeployment();
+
+      const UnllooFactory = await ethers.getContractFactory("UnllooCore");
       const unllooImpl = await UnllooFactory.deploy({
         gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
       });
@@ -128,6 +137,7 @@ describe("Unlloo", function () {
         ethers.ZeroAddress,
         minLoanAmount,
         maxLoanAmount,
+        await unllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -140,7 +150,11 @@ describe("Unlloo", function () {
 
     it("Should revert initialize with blockTimeSeconds > 86400", async function () {
       const usdcAddress = await usdc.getAddress();
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
+      const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+      const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await unllooExt.waitForDeployment();
+
+      const UnllooFactory = await ethers.getContractFactory("UnllooCore");
       const unllooImpl = await UnllooFactory.deploy({
         gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
       });
@@ -157,6 +171,7 @@ describe("Unlloo", function () {
         owner.address,
         minLoanAmount,
         maxLoanAmount,
+        await unllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -169,7 +184,11 @@ describe("Unlloo", function () {
 
     it("Should revert initialize with blockTimeSeconds causing blocksPerDay == 0", async function () {
       const usdcAddress = await usdc.getAddress();
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
+      const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+      const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await unllooExt.waitForDeployment();
+
+      const UnllooFactory = await ethers.getContractFactory("UnllooCore");
       const unllooImpl = await UnllooFactory.deploy({
         gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
       });
@@ -188,6 +207,7 @@ describe("Unlloo", function () {
         owner.address,
         minLoanAmount,
         maxLoanAmount,
+        await unllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -200,7 +220,11 @@ describe("Unlloo", function () {
 
     it("Should handle initialize with blockTimeSeconds at boundary (86400)", async function () {
       const usdcAddress = await usdc.getAddress();
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
+      const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+      const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await unllooExt.waitForDeployment();
+
+      const UnllooFactory = await ethers.getContractFactory("UnllooCore");
       const unllooImpl = await UnllooFactory.deploy({
         gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
       });
@@ -217,6 +241,7 @@ describe("Unlloo", function () {
         owner.address,
         minLoanAmount,
         maxLoanAmount,
+        await unllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -226,7 +251,7 @@ describe("Unlloo", function () {
       await proxy.waitForDeployment();
 
       // Should succeed - verify block time was set correctly
-      const unllooBoundary = await ethers.getContractAt("Unlloo", await proxy.getAddress());
+      const unllooBoundary = await ethers.getContractAt("UnllooCore", await proxy.getAddress());
       expect(await unllooBoundary.blockTimeSeconds()).to.equal(boundaryBlockTime);
     });
   });
@@ -716,7 +741,7 @@ describe("Unlloo", function () {
       // Mine enough blocks to ensure meaningful interest accrues
       await mine(BLOCKS_PER_DAY);
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       // Repay with a buffer; contract will cap to exact amount due (prevents 1-block drift leaving dust).
       const repayAmount = remainingBalance + 1_000_000n; // +1 USDC (6 decimals)
       await mintAndApproveUSDC(usdc, borrower1, repayAmount, await unlloo.getAddress());
@@ -727,7 +752,7 @@ describe("Unlloo", function () {
 
       const loanAfter = await unlloo.getLoan(loanId);
       expect(loanAfter.status).to.equal(5); // Repaid
-      expect(await unlloo.getRemainingBalance(loanId)).to.equal(0n);
+      expect(await unlloo.getTotalOwed(loanId)).to.equal(0n);
     });
 
     it("Should collect protocol fees on full repayment", async function () {
@@ -736,7 +761,7 @@ describe("Unlloo", function () {
       // Mine enough blocks to ensure meaningful interest accrues
       await mine(BLOCKS_PER_DAY);
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       const protocolFeeBefore = await unlloo.getProtocolFees(await usdc.getAddress());
 
       const repayAmount = remainingBalance + 1_000_000n;
@@ -759,7 +784,7 @@ describe("Unlloo", function () {
       const originalPrincipal = loan.principal; // Store original principal before repayment
 
       // Use getRemainingBalance to get the exact amount needed to fully repay
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       const repayAmount = remainingBalance + 1_000_000n;
       await mintAndApproveUSDC(usdc, borrower1, repayAmount, await unlloo.getAddress());
       await unlloo.connect(borrower1).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT });
@@ -787,30 +812,24 @@ describe("Unlloo", function () {
       // Mine some blocks to allow interest to accrue
       await mine(100);
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       // Add a significant amount to ensure it's clearly more than owed
       const excessiveAmount = remainingBalance + ethers.parseUnits("1000", constants.USDC_DECIMALS);
 
       await mintAndApproveUSDC(usdc, borrower1, excessiveAmount, await unlloo.getAddress());
       await expect(unlloo.connect(borrower1).repay(loanId, excessiveAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT }))
         .to.not.be.reverted;
-      expect(await unlloo.getRemainingBalance(loanId)).to.equal(0n);
+      expect(await unlloo.getTotalOwed(loanId)).to.equal(0n);
     });
 
-    it("Should revert when non-borrower tries to repay", async function () {
+    it("Should allow any address to repay on behalf of borrower", async function () {
       const { loanId } = await setupCompleteBorrow(unlloo, usdc, borrower1, lender1, owner);
 
-      await mintAndApproveUSDC(
-        usdc,
-        borrower2,
-        ethers.parseUnits("100", constants.USDC_DECIMALS),
-        await unlloo.getAddress(),
-      );
+      const repayAmount = ethers.parseUnits("100", constants.USDC_DECIMALS);
+      await mintAndApproveUSDC(usdc, borrower2, repayAmount, await unlloo.getAddress());
       await expect(
-        unlloo
-          .connect(borrower2)
-          .repay(loanId, ethers.parseUnits("100", constants.USDC_DECIMALS), { gasLimit: constants.COVERAGE_GAS_LIMIT }),
-      ).to.be.revertedWithCustomError(unlloo, "NotBorrower");
+        unlloo.connect(borrower2).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT }),
+      ).to.emit(unlloo, "LoanRepaid");
     });
 
     it("Should move to UnpaidDebt status when maxLoanDuration exceeded", async function () {
@@ -850,7 +869,7 @@ describe("Unlloo", function () {
       const repaidAfterFirst = loanAfterFirst.amountRepaid;
 
       // Should still be able to make another repayment in UnpaidDebt
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(usdc, borrower1, remainingBalance, await unlloo.getAddress());
       await unlloo.connect(borrower1).repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
@@ -868,7 +887,7 @@ describe("Unlloo", function () {
       expect(loan.status).to.equal(2); // Active
 
       // Repay immediately using remaining balance from view
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(usdc, borrower1, remainingBalance, await unlloo.getAddress());
       const tx = await unlloo
         .connect(borrower1)
@@ -2121,7 +2140,7 @@ describe("Unlloo", function () {
         // Now repay fully (removes from Active, adds to Repaid)
         await mine(BLOCKS_PER_DAY);
 
-        const remainingBalance = await unlloo.getRemainingBalance(loanId);
+        const remainingBalance = await unlloo.getTotalOwed(loanId);
         await mintAndApproveUSDC(usdc, borrower1, remainingBalance, await unlloo.getAddress());
         await unlloo.connect(borrower1).repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
@@ -2267,12 +2286,12 @@ describe("Unlloo", function () {
         // The defensive check at line 1756-1757 would return 0 if currentDebt < principal
         // This is extremely unlikely but the code handles it defensively
         // If this edge case occurred, _calculateAccruedInterest would return 0,
-        // making totalOwed = principal, and getRemainingBalance would work normally
-        const remainingBalance = await unlloo.getRemainingBalance(loanId);
+        // making totalOwed = principal
+        const remainingBalance = await unlloo.getTotalOwed(loanId);
         expect(remainingBalance).to.be.gte(0);
       });
 
-      it("Should handle getRemainingBalance when totalOwed equals amountRepaid", async function () {
+      it("Should return zero getTotalOwed after full repayment with buffer", async function () {
         const { loanId } = await setupCompleteBorrow(unlloo, usdc, borrower1, lender1, owner);
 
         // Wait for some interest to accrue
@@ -2286,7 +2305,7 @@ describe("Unlloo", function () {
         await unlloo.connect(borrower1).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
         // After full repayment, remaining balance should be 0 (covers the else branch: totalOwed <= amountRepaid)
-        const remainingBalance = await unlloo.getRemainingBalance(loanId);
+        const remainingBalance = await unlloo.getTotalOwed(loanId);
         expect(remainingBalance).to.equal(0);
 
         // Verify the loan shows as fully repaid
@@ -2343,16 +2362,6 @@ describe("Unlloo", function () {
 
         const totalOwed = await unlloo.getTotalOwed(loanId);
         expect(totalOwed).to.equal(0);
-      });
-
-      it("Should handle getRemainingBalance for fully repaid loan", async function () {
-        const { loanId } = await setupCompleteBorrow(unlloo, usdc, borrower1, lender1, owner);
-
-        await mine(BLOCKS_PER_DAY);
-        await repayFully(unlloo, usdc, borrower1, loanId);
-
-        const finalBalance = await unlloo.getRemainingBalance(loanId);
-        expect(finalBalance).to.equal(0);
       });
     });
 

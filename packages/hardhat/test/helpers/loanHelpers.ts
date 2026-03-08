@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../../typechain-types";
+import { MockERC20 } from "../../typechain-types";
+import { UnllooCombined } from "../fixtures/UnllooTestFixture";
 import { COVERAGE_GAS_LIMIT, USDC_DECIMALS } from "../fixtures/constants";
 import { mintAndApproveUSDC } from "./tokenHelpers";
 
@@ -10,7 +11,7 @@ export interface LoanSetupResult {
 }
 
 export async function submitLoanRequestHelper(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   borrower: HardhatEthersSigner,
   reputation: number,
@@ -26,7 +27,7 @@ export async function submitLoanRequestHelper(
 }
 
 export async function createAndApproveLoan(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   borrower: HardhatEthersSigner,
   owner: HardhatEthersSigner,
@@ -45,7 +46,7 @@ export async function createAndApproveLoan(
 }
 
 export async function setupCompleteBorrow(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   borrower: HardhatEthersSigner,
   lender: HardhatEthersSigner,
@@ -80,13 +81,13 @@ export async function setupCompleteBorrow(
   return { loanId, borrowAmount: maxBorrowable };
 }
 export async function repayFully(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   borrower: HardhatEthersSigner,
   loanId: bigint,
 ): Promise<void> {
   const unllooAddress = await unlloo.getAddress();
-  const remainingBalance = await unlloo.getRemainingBalance(loanId);
+  const remainingBalance = await unlloo.getTotalOwed(loanId);
 
   if (remainingBalance > 0n) {
     // Add buffer to account for interest accruing during transaction
@@ -99,7 +100,7 @@ export async function repayFully(
 }
 
 export async function repayPartial(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   borrower: HardhatEthersSigner,
   loanId: bigint,

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
-import { Bars3Icon, ChartBarIcon, StarIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, ChartBarIcon, ShieldCheckIcon, StarIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
@@ -64,6 +64,11 @@ export const menuLinks: HeaderMenuLink[] = [
         />
       </svg>
     ),
+  },
+  {
+    label: "Guarantor",
+    href: "/guarantor",
+    icon: <ShieldCheckIcon className="h-4 w-4" />,
   },
   {
     label: "Stats",

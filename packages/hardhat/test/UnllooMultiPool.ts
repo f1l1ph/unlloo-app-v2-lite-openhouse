@@ -8,8 +8,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { MockERC20, Unlloo } from "../typechain-types";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { MockERC20 } from "../typechain-types";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import * as constants from "./fixtures/constants";
 import {
   mintAndApproveUSDC,
@@ -21,7 +21,7 @@ import {
 
 describe("Unlloo - Multi Pool (Token Isolation)", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let tokenB: MockERC20;
   let owner: HardhatEthersSigner;

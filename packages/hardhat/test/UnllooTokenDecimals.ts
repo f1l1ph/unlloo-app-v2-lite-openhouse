@@ -7,14 +7,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20, NoDecimalsERC20 } from "../typechain-types";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { MockERC20, NoDecimalsERC20 } from "../typechain-types";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import * as constants from "./fixtures/constants";
 import { setupCompleteBorrow, mintAndApproveUSDC, depositLiquidity, repayFully } from "./helpers";
 
 describe("Unlloo - Token Decimals", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let owner: HardhatEthersSigner;
   let borrower1: HardhatEthersSigner;
   let lender1: HardhatEthersSigner;

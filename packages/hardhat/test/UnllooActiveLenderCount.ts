@@ -7,14 +7,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { MockERC20 } from "../typechain-types";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import * as constants from "./fixtures/constants";
 import { mintAndApproveUSDC, depositLiquidity, withdrawLiquidity, getLenderPosition } from "./helpers";
 
 describe("Unlloo - Active Lender Count", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let tokenB: MockERC20;
   let owner: HardhatEthersSigner;

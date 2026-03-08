@@ -7,11 +7,11 @@ import { ReputationDashboard } from "~~/components/unlloo/reputation/ReputationD
 
 const Home: NextPage = () => {
   return (
-    <AuthGuard>
-      <ErrorBoundary>
-        <ReputationDashboard />
-      </ErrorBoundary>
-    </AuthGuard>
+    // DEV_AUTH_BYPASS: <AuthGuard>
+    <ErrorBoundary>
+      <ReputationDashboard />
+    </ErrorBoundary>
+    // DEV_AUTH_BYPASS: </AuthGuard>
   );
 };
 

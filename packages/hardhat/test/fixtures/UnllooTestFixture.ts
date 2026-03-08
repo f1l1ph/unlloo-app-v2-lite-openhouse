@@ -1,12 +1,26 @@
 import { ethers } from "hardhat";
+import type { ContractRunner } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20, MockPriceFeed, UnllooProxy } from "../../typechain-types";
+import { UnllooCore, UnllooExt, MockERC20, MockPriceFeed, UnllooProxy } from "../../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import * as constants from "./constants";
 
+/**
+ * UnllooCore combined with UnllooExt methods.
+ * At runtime, calls to Ext-only functions are routed via Core's fallback delegatecall.
+ *
+ * We Omit the conflicting `connect()` signatures from each contract (Core returns
+ * UnllooCore, Ext returns UnllooExt) and replace them with a single signature that
+ * returns UnllooCombined. Without this override, TypeScript picks the first overload
+ * and `unlloo.connect(signer)` returns UnllooCore, hiding all Ext methods.
+ */
+export type UnllooCombined = Omit<UnllooCore & UnllooExt, "connect"> & {
+  connect(runner?: ContractRunner | null): UnllooCombined;
+};
+
 export interface UnllooTestContext {
   // Core contracts
-  unlloo: Unlloo;
+  unlloo: UnllooCombined;
   usdc: MockERC20;
   priceFeed: MockPriceFeed;
 
@@ -64,11 +78,18 @@ export async function setupUnllooTestFixture(options?: FixtureOptions): Promise<
   })) as MockPriceFeed;
   await priceFeed.waitForDeployment();
 
-  // Deploy Unlloo implementation
-  const UnllooFactory = await ethers.getContractFactory("Unlloo");
-  const unllooImpl = (await UnllooFactory.deploy({
+  // Deploy UnllooExt (no constructor arguments)
+  const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+  const unllooExt = (await UnllooExtFactory.deploy({
     gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
-  })) as Unlloo;
+  })) as UnllooExt;
+  await unllooExt.waitForDeployment();
+
+  // Deploy UnllooCore implementation
+  const UnllooCoreFactory = await ethers.getContractFactory("UnllooCore");
+  const unllooImpl = (await UnllooCoreFactory.deploy({
+    gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
+  })) as UnllooCore;
   await unllooImpl.waitForDeployment();
 
   // Calculate loan limits
@@ -77,24 +98,39 @@ export async function setupUnllooTestFixture(options?: FixtureOptions): Promise<
   const maxLoanAmount =
     opts.maxLoanAmount ?? BigInt(constants.MAX_LOAN_AMOUNT_USD) * 10n ** BigInt(constants.USDC_DECIMALS);
 
-  // Encode initialization data
+  // Encode initialization data (6th param: extensionDelegate = UnllooExt address)
   const initData = unllooImpl.interface.encodeFunctionData("initialize", [
     await usdc.getAddress(),
     constants.BLOCK_TIME_SECONDS,
     owner.address,
     minLoanAmount,
     maxLoanAmount,
+    await unllooExt.getAddress(),
   ]);
 
-  // Deploy proxy with implementation
+  // Deploy proxy with UnllooCore implementation
   const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
   const proxy = (await UnllooProxyFactory.deploy(await unllooImpl.getAddress(), initData, {
     gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
   })) as UnllooProxy;
   await proxy.waitForDeployment();
 
-  // Attach Unlloo interface to proxy
-  const unlloo = UnllooFactory.attach(await proxy.getAddress()) as Unlloo;
+  // Build a merged ABI from Core and Ext so all functions are callable via the proxy.
+  // At runtime, Core handles hot-path calls directly; Ext-only calls route via Core's fallback.
+  const proxyAddress = await proxy.getAddress();
+  const mergedAbi = [
+    ...UnllooCoreFactory.interface.fragments,
+    // Add Ext fragments that are not already in Core (avoid duplicate selectors)
+    ...UnllooExtFactory.interface.fragments.filter(extFrag => {
+      if (extFrag.type !== "function" && extFrag.type !== "event" && extFrag.type !== "error") return true;
+      if (extFrag.type === "function") {
+        return UnllooCoreFactory.interface.getFunction((extFrag as any).selector) === null;
+      }
+      return true;
+    }),
+  ];
+
+  const unlloo = new ethers.Contract(proxyAddress, mergedAbi, owner) as unknown as UnllooCombined;
 
   // Read block-based constants from contract
   const blocksPerDay = constants.BLOCKS_PER_DAY;
@@ -111,7 +147,7 @@ export async function setupUnllooTestFixture(options?: FixtureOptions): Promise<
 
   // Cache addresses
   const usdcAddress = await usdc.getAddress();
-  const unllooAddress = await unlloo.getAddress();
+  const unllooAddress = proxyAddress;
 
   return {
     unlloo,

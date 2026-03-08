@@ -318,7 +318,7 @@ describe("Unlloo - Comprehensive Tests", function () {
 
       // Full repayment - use remaining balance (accounts for partial repayments)
       // Note: We may need to repay slightly more if interest accrues between view call and execution
-      let remainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+      let remainingBalance = await ctx.unlloo.getTotalOwed(loanId);
       // Add small buffer for potential interest accrual between view and execution
       const buffer = ethers.parseUnits("1", constants.USDC_DECIMALS); // 1 USDC buffer
       await mintAndApproveUSDC(ctx.usdc, ctx.borrower1, remainingBalance + buffer, ctx.unllooAddress);
@@ -330,7 +330,7 @@ describe("Unlloo - Comprehensive Tests", function () {
           .repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT });
       } catch {
         // If it fails, interest may have accrued, try with updated remaining balance
-        remainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+        remainingBalance = await ctx.unlloo.getTotalOwed(loanId);
         await ctx.unlloo
           .connect(ctx.borrower1)
           .repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT });
@@ -1163,13 +1163,13 @@ describe("Unlloo - Comprehensive Tests", function () {
       // Get total owed after repayment
       const totalOwedAfter = await ctx.unlloo.getTotalOwed(loanId);
 
-      // New behavior: getTotalOwed() and getRemainingBalance() are equivalent (principal + interestDue).
+      // getTotalOwed() returns principal + interestDue.
       // Partial repayments reduce principal only after paying accrued interest for the epoch.
-      const remainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await ctx.unlloo.getTotalOwed(loanId);
       expect(remainingBalance).to.equal(totalOwedAfter);
     });
 
-    it("Should return accurate getRemainingBalance edge cases", async function () {
+    it("Should return accurate getTotalOwed edge cases", async function () {
       const depositAmount = ethers.parseUnits("10000", constants.USDC_DECIMALS);
       const borrowAmount = ethers.parseUnits("5000", constants.USDC_DECIMALS);
 
@@ -1191,7 +1191,7 @@ describe("Unlloo - Comprehensive Tests", function () {
       await ctx.unlloo.connect(ctx.borrower1).borrow(loanId, borrowAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
       // Immediately after borrow, remaining balance should equal principal + interest
-      const remainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await ctx.unlloo.getTotalOwed(loanId);
       const totalOwed = await ctx.unlloo.getTotalOwed(loanId);
       expect(remainingBalance).to.equal(totalOwed);
 
@@ -1202,7 +1202,7 @@ describe("Unlloo - Comprehensive Tests", function () {
       await mintAndApproveUSDC(ctx.usdc, ctx.borrower1, repayAmount, ctx.unllooAddress);
       await ctx.unlloo.connect(ctx.borrower1).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
-      const finalRemainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+      const finalRemainingBalance = await ctx.unlloo.getTotalOwed(loanId);
       expect(finalRemainingBalance).to.equal(0);
     });
 
@@ -1523,7 +1523,7 @@ describe("Unlloo - Comprehensive Tests", function () {
         // Only repay if loan is Active (2) or UnpaidDebt (3) and has remaining balance
         // Skip if already Repaid (5) or other statuses
         if (loanStatus === 2 || loanStatus === 3) {
-          const remainingBalance = await ctx.unlloo.getRemainingBalance(loanId);
+          const remainingBalance = await ctx.unlloo.getTotalOwed(loanId);
           if (remainingBalance > 0) {
             // Use remainingBalance instead of totalOwed to account for any partial repayments
             const repayAmount = remainingBalance + 1_000_000n;

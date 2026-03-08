@@ -1,5 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../../typechain-types";
+import { MockERC20 } from "../../typechain-types";
+import { UnllooCombined } from "../fixtures/UnllooTestFixture";
 import { COVERAGE_GAS_LIMIT } from "../fixtures/constants";
 import { mintAndApproveUSDC } from "./tokenHelpers";
 
@@ -10,7 +11,7 @@ export interface LenderPosition {
 }
 
 export async function depositLiquidity(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   lender: HardhatEthersSigner,
   amount: bigint,
@@ -25,7 +26,7 @@ export async function depositLiquidity(
 }
 
 export async function withdrawLiquidity(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   lender: HardhatEthersSigner,
   amount: bigint,
@@ -38,7 +39,7 @@ export async function withdrawLiquidity(
 }
 
 export async function withdrawAllLiquidity(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   lender: HardhatEthersSigner,
 ): Promise<void> {
@@ -52,7 +53,11 @@ export async function withdrawAllLiquidity(
   }
 }
 
-export async function getLenderPosition(unlloo: Unlloo, lender: string, token: string): Promise<LenderPosition> {
+export async function getLenderPosition(
+  unlloo: UnllooCombined,
+  lender: string,
+  token: string,
+): Promise<LenderPosition> {
   const position = await unlloo.getLenderPosition(lender, token);
   return {
     depositedAmount: position.depositedAmount,
@@ -61,7 +66,7 @@ export async function getLenderPosition(unlloo: Unlloo, lender: string, token: s
   };
 }
 
-export async function getPoolUtilization(unlloo: Unlloo, token: string): Promise<bigint> {
+export async function getPoolUtilization(unlloo: UnllooCombined, token: string): Promise<bigint> {
   const pool = await unlloo.getLiquidityPool(token);
 
   if (pool.totalLiquidity === 0n) return 0n;
@@ -69,7 +74,7 @@ export async function getPoolUtilization(unlloo: Unlloo, token: string): Promise
   return (pool.borrowedAmount * 10000n) / pool.totalLiquidity;
 }
 
-export async function getFreeLiquidity(unlloo: Unlloo, token: string): Promise<bigint> {
+export async function getFreeLiquidity(unlloo: UnllooCombined, token: string): Promise<bigint> {
   const pool = await unlloo.getLiquidityPool(token);
   return pool.totalLiquidity - pool.borrowedAmount;
 }

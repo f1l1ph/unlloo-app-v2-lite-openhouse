@@ -1,13 +1,14 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20, MockPriceFeed, UnllooProxy } from "../typechain-types";
+import { MockERC20, MockPriceFeed, UnllooProxy } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { calculateExpectedInterest } from "./helpers/calculationHelpers";
 import * as constants from "./fixtures/constants";
+import { UnllooCombined } from "./fixtures/UnllooTestFixture";
 
 describe("Unlloo - Coverage Improvements", function () {
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let priceFeed: MockPriceFeed;
 
@@ -76,9 +77,14 @@ describe("Unlloo - Coverage Improvements", function () {
     });
     await priceFeed.waitForDeployment();
 
-    // Deploy Unlloo implementation
-    const UnllooFactory = await ethers.getContractFactory("Unlloo");
-    const unllooImpl = await UnllooFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+    // Deploy UnllooExt
+    const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+    const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+    await unllooExt.waitForDeployment();
+
+    // Deploy UnllooCore implementation
+    const UnllooCoreFactory = await ethers.getContractFactory("UnllooCore");
+    const unllooImpl = await UnllooCoreFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
     await unllooImpl.waitForDeployment();
 
     // Initialize via proxy
@@ -91,6 +97,7 @@ describe("Unlloo - Coverage Improvements", function () {
       owner.address,
       minLoanAmount,
       maxLoanAmount,
+      await unllooExt.getAddress(),
     ]);
 
     const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -99,7 +106,17 @@ describe("Unlloo - Coverage Improvements", function () {
     })) as UnllooProxy;
     await proxy.waitForDeployment();
 
-    unlloo = UnllooFactory.attach(await proxy.getAddress()) as Unlloo;
+    const mergedAbi = [
+      ...UnllooCoreFactory.interface.fragments,
+      ...UnllooExtFactory.interface.fragments.filter(extFrag => {
+        if (extFrag.type !== "function" && extFrag.type !== "event" && extFrag.type !== "error") return true;
+        if (extFrag.type === "function") {
+          return UnllooCoreFactory.interface.getFunction((extFrag as any).selector) === null;
+        }
+        return true;
+      }),
+    ];
+    unlloo = new ethers.Contract(await proxy.getAddress(), mergedAbi, owner) as unknown as UnllooCombined;
 
     MIN_LOAN_DURATION_BLOCKS = await unlloo.minLoanDurationBlocks();
   });
@@ -245,9 +262,13 @@ describe("Unlloo - Coverage Improvements", function () {
       });
       await noDecimalsToken.waitForDeployment();
 
-      // Deploy a new Unlloo implementation
-      const UnllooFactory = await ethers.getContractFactory("Unlloo");
-      const newUnllooImpl = await UnllooFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      // Deploy a new UnllooExt + UnllooCore implementation
+      const UnllooExtFactory2 = await ethers.getContractFactory("UnllooExt");
+      const newUnllooExt = await UnllooExtFactory2.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+      await newUnllooExt.waitForDeployment();
+
+      const UnllooCoreFactory2 = await ethers.getContractFactory("UnllooCore");
+      const newUnllooImpl = await UnllooCoreFactory2.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
       await newUnllooImpl.waitForDeployment();
 
       // Initialize should revert because _validateTokenDecimals will fail
@@ -261,6 +282,7 @@ describe("Unlloo - Coverage Improvements", function () {
         owner.address,
         minLoanAmountNew,
         maxLoanAmountNew,
+        await newUnllooExt.getAddress(),
       ]);
 
       const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -625,14 +647,14 @@ describe("Unlloo - Coverage Improvements", function () {
       const { loanId } = await setupCompleteBorrow(borrower1, lender1);
       await mine(Number(constants.BLOCKS_PER_DAY));
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
 
       const repayAmount = remainingBalance + 1_000_000n;
       await mintAndApproveUSDC(borrower1, repayAmount);
 
       await expect(unlloo.connect(borrower1).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT })).to
         .not.be.reverted;
-      expect(await unlloo.getRemainingBalance(loanId)).to.equal(0n);
+      expect(await unlloo.getTotalOwed(loanId)).to.equal(0n);
     });
 
     it("Should revert depositLiquidity with zero amount", async function () {
@@ -826,16 +848,16 @@ describe("Unlloo - Coverage Improvements", function () {
       ).to.be.revertedWithCustomError(unlloo, "InvalidLoanStatus");
     });
 
-    it("Should revert when non-borrower tries to repay", async function () {
+    it("Should allow any address to repay on behalf of borrower", async function () {
       const { loanId } = await setupCompleteBorrow(borrower1, lender1);
       await mine(Number(constants.BLOCKS_PER_DAY));
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(lender1, remainingBalance);
 
       await expect(
         unlloo.connect(lender1).repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT }),
-      ).to.be.revertedWithCustomError(unlloo, "NotBorrower");
+      ).to.emit(unlloo, "LoanRepaid");
     });
 
     it("Should revert when trying to approve already approved loan", async function () {
@@ -889,7 +911,7 @@ describe("Unlloo - Coverage Improvements", function () {
       const { loanId } = await setupCompleteBorrow(borrower1, lender1);
       await mine(Number(constants.BLOCKS_PER_DAY));
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(borrower1, remainingBalance);
       await unlloo.connect(borrower1).repay(loanId, remainingBalance, { gasLimit: constants.COVERAGE_GAS_LIMIT });
 
@@ -1072,7 +1094,7 @@ describe("Unlloo - Coverage Improvements", function () {
 
       await unlloo.connect(owner).pause({ gasLimit: constants.COVERAGE_GAS_LIMIT });
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(borrower1, remainingBalance);
 
       // Repay should work even when paused

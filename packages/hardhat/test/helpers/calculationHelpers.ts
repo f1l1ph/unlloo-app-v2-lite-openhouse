@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { Unlloo, MockERC20 } from "../../typechain-types";
+import { MockERC20 } from "../../typechain-types";
+import { UnllooCombined } from "../fixtures/UnllooTestFixture";
 import { BLOCK_TIME_SECONDS, PROTOCOL_FEE_BPS } from "../fixtures/constants";
 
 export interface BalanceAccounting {
@@ -38,7 +39,7 @@ export function calculateLenderSurplus(interest: bigint, feeBps: bigint = BigInt
 }
 
 export async function getContractBalanceAccounting(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   tokenAddress: string,
 ): Promise<BalanceAccounting> {
@@ -65,7 +66,7 @@ export async function getContractBalanceAccounting(
 }
 
 export async function verifyEconomicBalance(
-  unlloo: Unlloo,
+  unlloo: UnllooCombined,
   token: MockERC20,
   tokenAddress: string,
   description: string,

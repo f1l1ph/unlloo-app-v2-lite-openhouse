@@ -45,7 +45,17 @@ library UnllooErrors {
     // ============ Initialization Errors ============
     error InvalidOwner(address owner);
     error InvalidDefaultToken(address token);
+    error InvalidAddress(address addr);
 
     // ============ Transfer Errors ============
     error UnsupportedTokenTransfer(address token);
+
+    // ============ Guarantor Errors ============
+    error GuaranteeAlreadyExists(address guarantor, address borrower);
+    error GuaranteeNotFound(address guarantor, address borrower);
+    error BondNotActive(address guarantor, address borrower);
+    error BorrowerHasOpenLoan(address borrower);
+    error InsufficientBondCoverage(uint256 required, uint256 provided);
+    error GracePeriodNotExpired(uint256 currentBlock, uint256 gracePeriodEndBlock);
+    error CannotGuaranteeSelf();
 }

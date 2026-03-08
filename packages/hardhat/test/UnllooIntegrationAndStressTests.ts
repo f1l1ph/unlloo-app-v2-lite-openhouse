@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
+import { MockERC20 } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import { mintAndApproveUSDC } from "./helpers/tokenHelpers";
 import { createAndApproveLoan, setupCompleteBorrow } from "./helpers/loanHelpers";
 import * as constants from "./fixtures/constants";
@@ -20,7 +20,7 @@ import * as constants from "./fixtures/constants";
  */
 describe("Unlloo - Integration and Stress Tests", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let owner: HardhatEthersSigner;
   let borrower1: HardhatEthersSigner;

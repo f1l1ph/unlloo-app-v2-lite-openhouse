@@ -12,9 +12,10 @@ import {
   FromToFeeERC20,
   MockERC20,
   RevertingMaliciousERC20,
-  Unlloo,
   UnllooProxy,
+  UnllooExt,
 } from "../typechain-types";
+import { UnllooCombined } from "./fixtures/UnllooTestFixture";
 
 function mulberry32(seed: number) {
   return function () {
@@ -30,7 +31,7 @@ function randInt(rng: () => number, maxExclusive: number): number {
 }
 
 describe("Unlloo - Security Hardening (Adversarial Tokens + Reentrancy + Heavy Pseudo-Fuzz)", function () {
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
 
   let owner: HardhatEthersSigner;
@@ -66,8 +67,17 @@ describe("Unlloo - Security Hardening (Adversarial Tokens + Reentrancy + Heavy P
     })) as MockERC20;
     await usdc.waitForDeployment();
 
-    const UnllooFactory = await ethers.getContractFactory("Unlloo");
-    const unllooImpl = (await UnllooFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT })) as Unlloo;
+    // Deploy UnllooExt
+    const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+    const unllooExt = (await UnllooExtFactory.deploy({
+      gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
+    })) as UnllooExt;
+    await unllooExt.waitForDeployment();
+
+    const UnllooFactory = await ethers.getContractFactory("UnllooCore");
+    const unllooImpl = (await UnllooFactory.deploy({
+      gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
+    })) as unknown as UnllooCombined;
     await unllooImpl.waitForDeployment();
 
     const initData = unllooImpl.interface.encodeFunctionData("initialize", [
@@ -76,6 +86,7 @@ describe("Unlloo - Security Hardening (Adversarial Tokens + Reentrancy + Heavy P
       owner.address,
       constants.parseUSDC(constants.MIN_LOAN_AMOUNT_USD),
       constants.parseUSDC(constants.MAX_LOAN_AMOUNT_USD),
+      await unllooExt.getAddress(),
     ]);
 
     const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -84,7 +95,15 @@ describe("Unlloo - Security Hardening (Adversarial Tokens + Reentrancy + Heavy P
     })) as UnllooProxy;
     await proxy.waitForDeployment();
 
-    unlloo = UnllooFactory.attach(await proxy.getAddress()) as Unlloo;
+    const proxyAddress = await proxy.getAddress();
+    const mergedAbi = [
+      ...UnllooFactory.interface.fragments,
+      ...UnllooExtFactory.interface.fragments.filter((extFrag: any) => {
+        if (extFrag.type !== "function") return true;
+        return UnllooFactory.interface.getFunction(extFrag.selector) === null;
+      }),
+    ];
+    unlloo = new ethers.Contract(proxyAddress, mergedAbi, owner) as unknown as UnllooCombined;
   }
 
   async function deployAdversarialTokens() {
@@ -465,7 +484,7 @@ describe("Unlloo - Security Hardening (Adversarial Tokens + Reentrancy + Heavy P
             // repay (partial/full) if borrower has active loan
             const loanId = await unlloo.getActiveLoanByBorrower(borrower.address);
             if (loanId !== 0n) {
-              const remaining = await unlloo.getRemainingBalance(loanId);
+              const remaining = await unlloo.getTotalOwed(loanId);
               if (remaining > 0n) {
                 const pay = remaining / BigInt(1 + randInt(rng, 3)); // 33%-100%
                 const repayAmount = pay + 1_000_000n;

@@ -253,14 +253,14 @@ interface IUnlloo {
 
     /// @notice Emitted on each loan repayment (partial or full)
     /// @param loanId Loan identifier being repaid (indexed)
-    /// @param borrower Address making the repayment (indexed)
+    /// @param payer Address that sent the repayment tokens (indexed) — may differ from borrower
     /// @param token ERC20 token address being repaid
     /// @param repaymentAmount Amount repaid in this transaction
     /// @param remainingBalance Outstanding balance after repayment (0 if fully repaid)
     /// @param blockNumber Block number when repayment occurred
     event LoanRepaid(
         uint256 indexed loanId,
-        address indexed borrower,
+        address indexed payer,
         address token,
         uint256 repaymentAmount,
         uint256 remainingBalance,
@@ -384,6 +384,17 @@ interface IUnlloo {
     /// @param amount Amount recovered in token decimals
     /// @param blockNumber Block number when emergency withdrawal occurred
     event EmergencyWithdraw(address indexed token, uint256 amount, uint256 blockNumber);
+
+    /// @notice Emitted when the extension delegate contract is updated
+    /// @dev Emitted by setExtension(); used to track Ext upgrade history
+    /// @param oldExtension Address of the previous UnllooExt contract (indexed)
+    /// @param newExtension Address of the new UnllooExt contract (indexed)
+    /// @param blockNumber Block number when the update occurred
+    event ExtensionUpdated(
+        address indexed oldExtension,
+        address indexed newExtension,
+        uint256 blockNumber
+    );
 
     // ---------------------- Configuration Events ----------------------
 
@@ -509,12 +520,6 @@ interface IUnlloo {
     /// @param loanId Identifier of the loan to query
     /// @return Total owed amount in token decimals
     function getTotalOwed(uint256 loanId) external view returns (uint256);
-
-    /// @notice Calculate remaining balance after accounting for repayments
-    /// @dev Returns totalOwed - amountRepaid; 0 if fully repaid
-    /// @param loanId Identifier of the loan to query
-    /// @return Remaining balance in token decimals
-    function getRemainingBalance(uint256 loanId) external view returns (uint256);
 
     /// @notice Get all loan IDs for a specific borrower
     /// @dev Returns loans in all statuses (historical and current)
@@ -695,6 +700,12 @@ interface IUnlloo {
     /// @param amount Amount of fees to withdraw in token decimals
     function withdrawProtocolFees(address token, uint256 amount) external;
 
+    /// @notice Update the address of the UnllooExt extension contract (admin only)
+    /// @dev Updates extensionDelegate and emits ExtensionUpdated.
+    ///      In production this should be protected by a timelock.
+    /// @param newExtension Address of the new UnllooExt deployment
+    function setExtension(address newExtension) external;
+
     // =============================================================
     //                    CONFIG GETTERS (Safe to expose)
     // =============================================================
@@ -760,4 +771,85 @@ interface IUnlloo {
     /// @notice Minimum borrower rate in basis points (5% = 500)
     /// @return Minimum annual borrow rate in basis points
     function MIN_BORROWER_RATE() external view returns (uint256);
+
+    // =============================================================
+    //                     GUARANTOR TYPES
+    // =============================================================
+
+    /// @notice A guarantor's collateral bond backing a specific borrower
+    struct GuaranteeBond {
+        address guarantor;
+        address borrower;
+        address token;
+        uint256 lockedAmount;       // Collateral held by the contract
+        uint256 maxCoverageAmount;  // Max loan amount this bond covers
+        bool active;
+    }
+
+    // ---------------------- Guarantor Events ----------------------
+
+    event GuaranteeRegistered(
+        address indexed guarantor,
+        address indexed borrower,
+        address token,
+        uint256 collateralAmount,
+        uint256 maxCoverageAmount,
+        uint256 blockNumber
+    );
+
+    event GuaranteeRemoved(
+        address indexed guarantor,
+        address indexed borrower,
+        uint256 collateralReturned,
+        uint256 blockNumber
+    );
+
+    event GuarantorCoveredDebt(
+        uint256 indexed loanId,
+        address indexed guarantor,
+        address indexed borrower,
+        uint256 amountCovered,
+        uint256 blockNumber
+    );
+
+    event GuarantorBondSeized(
+        uint256 indexed loanId,
+        address indexed guarantor,
+        address indexed borrower,
+        uint256 amountSeized,
+        uint256 blockNumber
+    );
+
+    event GuarantorGracePeriodUpdated(
+        uint256 oldGracePeriodBlocks,
+        uint256 newGracePeriodBlocks,
+        uint256 blockNumber
+    );
+
+    // =============================================================
+    //                     GUARANTOR FUNCTIONS
+    // =============================================================
+
+    /// @notice Guarantor locks collateral to back a borrower
+    /// @dev collateralAmount must be >= maxCoverageAmount (100% coverage required)
+    function registerGuarantee(address borrower, address token, uint256 collateralAmount, uint256 maxCoverageAmount) external;
+
+    /// @notice Guarantor removes their bond (only if borrower has no active/unpaid loan)
+    function removeGuarantee(address borrower) external;
+
+    /// @notice Guarantor voluntarily covers a defaulted borrower's outstanding debt
+    function guarantorCoverDebt(uint256 loanId) external;
+
+    /// @notice Admin seizes guarantor bond after grace period expires
+    function seizeGuarantorBond(uint256 loanId, address guarantor) external;
+
+    /// @notice Admin updates the grace period before bond seizure is allowed
+    function updateGuarantorGracePeriod(uint256 newGracePeriodBlocks) external;
+
+    function getGuaranteeBond(address borrower, address guarantor) external view returns (GuaranteeBond memory);
+    function getGuarantorsForBorrower(address borrower) external view returns (address[] memory);
+    function getGuaranteesByGuarantor(address guarantor) external view returns (address[] memory borrowers);
+    function isGuaranteed(address borrower) external view returns (bool);
+    function getTotalLockedByGuarantor(address guarantor, address token) external view returns (uint256);
+    function guarantorGracePeriodBlocks() external view returns (uint256);
 }

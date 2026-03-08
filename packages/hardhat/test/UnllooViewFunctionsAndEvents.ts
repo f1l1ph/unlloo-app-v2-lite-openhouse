@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
+import { MockERC20 } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import { mintAndApproveUSDC } from "./helpers/tokenHelpers";
 import { createAndApproveLoan, setupCompleteBorrow } from "./helpers/loanHelpers";
 import * as constants from "./fixtures/constants";
@@ -19,7 +19,7 @@ import * as constants from "./fixtures/constants";
  */
 describe("Unlloo - View Functions and Events", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let owner: HardhatEthersSigner;
   let borrower1: HardhatEthersSigner;
@@ -493,8 +493,8 @@ describe("Unlloo - View Functions and Events", function () {
       });
     });
 
-    describe("getRemainingBalance", function () {
-      it("Should return correct remaining balance after partial repayment", async function () {
+    describe("getTotalOwed", function () {
+      it("Should return correct total owed after partial repayment", async function () {
         const { loanId, borrowAmount } = await setupCompleteBorrow(
           unlloo,
           usdc,
@@ -515,11 +515,11 @@ describe("Unlloo - View Functions and Events", function () {
           gasLimit: constants.COVERAGE_GAS_LIMIT,
         });
 
-        const remainingBalance = await unlloo.getRemainingBalance(loanId);
-        // After partial repayment, remaining balance should be less than totalOwed
+        const totalOwedAfter = await unlloo.getTotalOwed(loanId);
+        // After partial repayment, total owed should be less than before (or 0 if fully repaid)
         // Contract may have cleared principal if within dust threshold
-        if (remainingBalance > 0n) {
-          expect(remainingBalance).to.be.lt(totalOwed);
+        if (totalOwedAfter > 0n) {
+          expect(totalOwedAfter).to.be.lt(totalOwed);
         } else {
           // Loan may have been fully repaid if principal was cleared
           const loan = await unlloo.loans(loanId);
@@ -527,7 +527,7 @@ describe("Unlloo - View Functions and Events", function () {
         }
       });
 
-      it("Should return zero when loan fully repaid", async function () {
+      it("Should return zero total owed when loan fully repaid", async function () {
         const { loanId } = await setupCompleteBorrow(
           unlloo,
           usdc,
@@ -547,7 +547,7 @@ describe("Unlloo - View Functions and Events", function () {
           gasLimit: constants.COVERAGE_GAS_LIMIT,
         });
 
-        const remainingBalance = await unlloo.getRemainingBalance(loanId);
+        const remainingBalance = await unlloo.getTotalOwed(loanId);
         expect(remainingBalance).to.equal(0n);
       });
     });
@@ -674,7 +674,7 @@ describe("Unlloo - View Functions and Events", function () {
         if (event) {
           const parsed = unlloo.interface.parseLog(event);
           expect(parsed?.args.loanId).to.equal(loanId);
-          expect(parsed?.args.borrower).to.equal(borrower1.address);
+          expect(parsed?.args.payer).to.equal(borrower1.address);
         }
       });
     });

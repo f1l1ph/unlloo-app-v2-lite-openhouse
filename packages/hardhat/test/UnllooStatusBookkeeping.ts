@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { MockERC20, Unlloo } from "../typechain-types";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { MockERC20 } from "../typechain-types";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import * as constants from "./fixtures/constants";
 import { mintAndApproveUSDC, repayFully, assertNoDuplicates } from "./helpers";
 
 describe("Unlloo - Status Arrays & Per-Pool Counters Integrity", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let usdcAddr: string;
   let owner: HardhatEthersSigner;

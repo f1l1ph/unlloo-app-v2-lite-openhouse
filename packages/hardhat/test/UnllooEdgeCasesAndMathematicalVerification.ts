@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
+import { MockERC20 } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import { mintAndApproveUSDC } from "./helpers/tokenHelpers";
 import { createAndApproveLoan, setupCompleteBorrow } from "./helpers/loanHelpers";
 import * as constants from "./fixtures/constants";
@@ -22,7 +22,7 @@ import * as constants from "./fixtures/constants";
  */
 describe("Unlloo - Edge Cases and Mathematical Verification", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let owner: HardhatEthersSigner;
   let borrower1: HardhatEthersSigner;
@@ -261,7 +261,7 @@ describe("Unlloo - Edge Cases and Mathematical Verification", function () {
 
       // Second partial repayment (pay some interest)
       // Get remaining balance after first repayment
-      const remainingBalanceAfter1 = await unlloo.getRemainingBalance(loanId);
+      const remainingBalanceAfter1 = await unlloo.getTotalOwed(loanId);
       const accruedInterestAfter1 = await unlloo.getAccruedInterest(loanId);
       // Pay half of remaining, which should include some interest
       const partialRepayment2 = remainingBalanceAfter1 / 2n;
@@ -294,7 +294,7 @@ describe("Unlloo - Edge Cases and Mathematical Verification", function () {
       expect(protocolFeesAfter2 - protocolFeesBefore).to.be.closeTo(totalExpectedFee, 1000n);
 
       // Final repayment - use remaining balance to avoid overpayment
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       await mintAndApproveUSDC(usdc, borrower1, remainingBalance, await unlloo.getAddress());
       await unlloo.connect(borrower1).repay(loanId, remainingBalance, {
         gasLimit: constants.COVERAGE_GAS_LIMIT,
@@ -643,7 +643,7 @@ describe("Unlloo - Edge Cases and Mathematical Verification", function () {
       const loan = await unlloo.loans(loanId);
       // Loan should still be Active because interest is still owed
       // Contract only marks as Repaid when both principal AND interest are fully paid
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       if (remainingBalance > 0n) {
         // If we're at/after the deadline, the contract transitions to UnpaidDebt.
         const deadline = Number(loan.startBlock + loan.loanDurationBlocks);

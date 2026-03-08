@@ -9,3 +9,5 @@ export { usePendingLoanRequests } from "./usePendingLoanRequests";
 export type { LoanRequest } from "./usePendingLoanRequests";
 export { useAllLoans } from "./useAllLoans";
 export type { LoanData } from "./useAllLoans";
+export { useGuarantees } from "./useGuarantees";
+export type { GuaranteeBond } from "./useGuarantees";

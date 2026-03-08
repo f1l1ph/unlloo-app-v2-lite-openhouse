@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
+import { MockERC20 } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import * as constants from "./fixtures/constants";
+import { UnllooCombined } from "./fixtures/UnllooTestFixture";
 
 /**
  * @title Unlloo Interest Accrual Baseline Tests (Strategy A)
@@ -16,7 +17,7 @@ import * as constants from "./fixtures/constants";
  */
 describe("Unlloo - Interest Accrual Baseline (Strategy A)", function () {
   // Contract instances
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
 
   // Signers
@@ -78,8 +79,13 @@ describe("Unlloo - Interest Accrual Baseline (Strategy A)", function () {
     });
     await usdc.waitForDeployment();
 
-    // Deploy Unlloo
-    const UnllooFactory = await ethers.getContractFactory("Unlloo");
+    // Deploy UnllooExt (extension delegate)
+    const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+    const unllooExt = await UnllooExtFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
+    await unllooExt.waitForDeployment();
+
+    // Deploy UnllooCore implementation
+    const UnllooFactory = await ethers.getContractFactory("UnllooCore");
     const unllooImpl = await UnllooFactory.deploy({ gasLimit: constants.DEPLOYMENT_GAS_LIMIT });
     await unllooImpl.waitForDeployment();
     const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -87,16 +93,34 @@ describe("Unlloo - Interest Accrual Baseline (Strategy A)", function () {
       gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
     });
     await unllooProxy.waitForDeployment();
-    unlloo = UnllooFactory.attach(await unllooProxy.getAddress()) as Unlloo;
+
+    // Build merged ABI so all Core + Ext functions are callable via the proxy
+    const proxyAddress = await unllooProxy.getAddress();
+    const mergedAbi = [
+      ...UnllooFactory.interface.fragments,
+      ...UnllooExtFactory.interface.fragments.filter((extFrag: any) => {
+        if (extFrag.type !== "function") return true;
+        return UnllooFactory.interface.getFunction(extFrag.selector) === null;
+      }),
+    ];
+    unlloo = new ethers.Contract(proxyAddress, mergedAbi, owner) as unknown as UnllooCombined;
 
     // Initialize
     const usdcAddress = await usdc.getAddress();
     const blockTimeSeconds = 12n; // 12 seconds per block
     const defaultMinLoan = ethers.parseUnits("100", constants.USDC_DECIMALS);
     const defaultMaxLoan = ethers.parseUnits("1000000", constants.USDC_DECIMALS);
-    await unlloo.initialize(usdcAddress, blockTimeSeconds, owner.address, defaultMinLoan, defaultMaxLoan, {
-      gasLimit: constants.COVERAGE_GAS_LIMIT,
-    });
+    await unlloo.initialize(
+      usdcAddress,
+      blockTimeSeconds,
+      owner.address,
+      defaultMinLoan,
+      defaultMaxLoan,
+      await unllooExt.getAddress(),
+      {
+        gasLimit: constants.COVERAGE_GAS_LIMIT,
+      },
+    );
 
     // Setup liquidity
     const depositAmount = ethers.parseUnits("1000000", constants.USDC_DECIMALS);

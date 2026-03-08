@@ -165,10 +165,10 @@ function validateBlockTimeCompatibility(blockTimeSeconds: number): void {
 }
 
 function validateUnllooInitializeArgs(args: unknown[]): void {
-  if (args.length !== 5) {
-    throw new Error(`Unlloo.initialize requires 5 arguments, got ${args.length}`);
+  if (args.length !== 6) {
+    throw new Error(`UnllooCore.initialize requires 6 arguments, got ${args.length}`);
   }
-  const [_defaultToken, _blockTimeSeconds, initialOwner, _minLoan, _maxLoan] = args;
+  const [_defaultToken, _blockTimeSeconds, initialOwner, _minLoan, _maxLoan, _extensionDelegate] = args;
 
   if (typeof _defaultToken !== "string" || !/^0x[a-fA-F0-9]{40}$/.test(_defaultToken)) {
     throw new Error("Invalid _defaultToken in initialize args");
@@ -179,7 +179,6 @@ function validateUnllooInitializeArgs(args: unknown[]): void {
   if (typeof _blockTimeSeconds !== "number" || _blockTimeSeconds <= 0 || _blockTimeSeconds > SECONDS_PER_DAY) {
     throw new Error(`Invalid _blockTimeSeconds: ${_blockTimeSeconds}`);
   }
-
   if (typeof _minLoan !== "bigint" || _minLoan <= 0n) {
     throw new Error("Invalid _defaultMinLoanAmount in initialize args");
   }
@@ -188,6 +187,9 @@ function validateUnllooInitializeArgs(args: unknown[]): void {
   }
   if (_minLoan >= _maxLoan) {
     throw new Error("Invalid pool loan limits: min must be < max");
+  }
+  if (typeof _extensionDelegate !== "string" || !/^0x[a-fA-F0-9]{40}$/.test(_extensionDelegate)) {
+    throw new Error("Invalid _extensionDelegate in initialize args");
   }
 }
 
@@ -389,11 +391,12 @@ async function verifyContractInteractions(
     blockTimeSeconds: number;
     minLoanAmount: bigint;
     maxLoanAmount: bigint;
+    extensionDelegate: string;
   },
 ): Promise<void> {
   console.log("🔍 Verifying contract interactions...\n");
 
-  const unlloo = await hre.ethers.getContractAt("Unlloo", unllooProxyAddress);
+  const unlloo = await hre.ethers.getContractAt("UnllooCore", unllooProxyAddress);
 
   // Owner
   const owner = (await unlloo.owner()) as string;
@@ -428,6 +431,12 @@ async function verifyContractInteractions(
     );
   }
 
+  // Extension delegate
+  const extDelegate = (await unlloo.extensionDelegate()) as string;
+  if (extDelegate.toLowerCase() !== expected.extensionDelegate.toLowerCase()) {
+    throw new Error(`extensionDelegate mismatch: expected ${expected.extensionDelegate}, got ${extDelegate}`);
+  }
+
   console.log("   ✅ Wiring + basic invariants verified\n");
 }
 
@@ -439,7 +448,7 @@ async function displayDeploymentSummary(
   tokenDecimals: number,
 ): Promise<void> {
   const unllooProxyAddress = state.deployedContracts.find(c => c.name === "Unlloo")!.address;
-  const unlloo = await hre.ethers.getContractAt("Unlloo", unllooProxyAddress);
+  const unlloo = await hre.ethers.getContractAt("UnllooCore", unllooProxyAddress);
 
   const owner = (await unlloo.owner()) as string;
   const defaultToken = (await unlloo.defaultToken()) as string;
@@ -495,7 +504,7 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   await validateChainId(hre, networkName);
   validateBlockTimeCompatibility(config.blockTimeSeconds);
 
-  await checkExistingDeployments(hre, ["MockERC20", "UnllooImplementation", "Unlloo"]);
+  await checkExistingDeployments(hre, ["MockERC20", "UnllooExtDeployment", "UnllooCoreImplementation", "Unlloo"]);
 
   // Owner: mock admin for local, deployer otherwise
   const ownerAddress = config.isLocalNetwork ? mockConfig.mint.admin : deployer;
@@ -527,8 +536,16 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     const maxLoan = hre.ethers.parseUnits(DEFAULT_MAX_LOAN_AMOUNT_HUMAN, Number(tokenDecimals));
 
     const placeholderToken = config.needsMocks ? "0x0000000000000000000000000000000000000001" : config.usdc;
+    const placeholderExt = "0x0000000000000000000000000000000000000002";
 
-    validateUnllooInitializeArgs([placeholderToken, config.blockTimeSeconds, ownerAddress, minLoan, maxLoan]);
+    validateUnllooInitializeArgs([
+      placeholderToken,
+      config.blockTimeSeconds,
+      ownerAddress,
+      minLoan,
+      maxLoan,
+      placeholderExt,
+    ]);
 
     console.log("✅ Dry run validation passed. Set DRY_RUN=false to deploy.\n");
     return;
@@ -536,7 +553,9 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
 
   // Pre-estimate gas where possible
   const estimatedGasCosts: bigint[] = [];
-  const toEstimate = config.needsMocks ? ["MockERC20", "Unlloo", "UnllooProxy"] : ["Unlloo", "UnllooProxy"];
+  const toEstimate = config.needsMocks
+    ? ["MockERC20", "UnllooExt", "UnllooCore", "UnllooProxy"]
+    : ["UnllooExt", "UnllooCore", "UnllooProxy"];
 
   for (const name of toEstimate) {
     // UnllooProxy needs init data; estimate later after init args are computed
@@ -546,9 +565,8 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     if (name === "MockERC20") {
       args = [mockConfig.erc20.name, mockConfig.erc20.symbol, mockConfig.erc20.decimals];
     }
-
-    // Unlloo implementation has 0 constructor args
-    const estimatedGas = await estimateDeploymentGas(hre, name === "Unlloo" ? "Unlloo" : name, args, deployer);
+    // UnllooExt and UnllooCore have 0 constructor args
+    const estimatedGas = await estimateDeploymentGas(hre, name, args, deployer);
     if (estimatedGas) estimatedGasCosts.push(estimatedGas);
   }
 
@@ -612,15 +630,15 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   const defaultMinLoanAmount = hre.ethers.parseUnits(DEFAULT_MIN_LOAN_AMOUNT_HUMAN, tokenDecimals);
   const defaultMaxLoanAmount = hre.ethers.parseUnits(DEFAULT_MAX_LOAN_AMOUNT_HUMAN, tokenDecimals);
 
-  // Step 2: Unlloo implementation (no constructor args)
-  console.log("🔧 Step 2: Deploying Unlloo implementation...");
-  const unllooImpl = await deployWithValidation(
+  // Step 2: Deploy UnllooExt (no constructor args)
+  console.log("🔧 Step 2: Deploying UnllooExt...");
+  const unllooExt = await deployWithValidation(
     hre,
     deploy,
-    "UnllooImplementation",
+    "UnllooExtDeployment",
     {
       from: deployer,
-      contract: "Unlloo",
+      contract: "UnllooExt",
       args: [],
       log: true,
       autoMine: true,
@@ -628,25 +646,45 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     deploymentState,
     config,
   );
-  console.log(`   ✅ Unlloo implementation deployed at: ${unllooImpl.address}\n`);
+  console.log(`   ✅ UnllooExt deployed at: ${unllooExt.address}\n`);
 
-  // Step 3: Deploy proxy + initialize
-  console.log("🔧 Step 3: Deploying Unlloo proxy + initializing...");
+  // Step 3: Deploy UnllooCore implementation (no constructor args)
+  console.log("🔧 Step 3: Deploying UnllooCore implementation...");
+  const unllooImpl = await deployWithValidation(
+    hre,
+    deploy,
+    "UnllooCoreImplementation",
+    {
+      from: deployer,
+      contract: "UnllooCore",
+      args: [],
+      log: true,
+      autoMine: true,
+    },
+    deploymentState,
+    config,
+  );
+  console.log(`   ✅ UnllooCore implementation deployed at: ${unllooImpl.address}\n`);
 
-  await validateContractAddress(hre, unllooImpl.address, "UnllooImplementation");
+  // Step 4: Deploy proxy + initialize
+  console.log("🔧 Step 4: Deploying Unlloo proxy + initializing...");
+
+  await validateContractAddress(hre, unllooExt.address, "UnllooExt");
+  await validateContractAddress(hre, unllooImpl.address, "UnllooCoreImplementation");
   await validateContractAddress(hre, defaultTokenAddress, "DefaultToken");
 
-  const unllooFactory = await hre.ethers.getContractFactory("Unlloo");
+  const unllooCoreFactory = await hre.ethers.getContractFactory("UnllooCore");
   const initArgs: unknown[] = [
     defaultTokenAddress,
     config.blockTimeSeconds,
     ownerAddress,
     defaultMinLoanAmount,
     defaultMaxLoanAmount,
+    unllooExt.address,
   ];
   validateUnllooInitializeArgs(initArgs);
 
-  const initData = unllooFactory.interface.encodeFunctionData("initialize", initArgs as any[]);
+  const initData = unllooCoreFactory.interface.encodeFunctionData("initialize", initArgs as any[]);
 
   // (Optional) estimate proxy deploy gas now that we have init data
   try {
@@ -674,19 +712,39 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
   );
   console.log(`   ✅ Unlloo proxy deployed at: ${unllooProxy.address}\n`);
 
-  // CRITICAL: Save the deployment with the implementation ABI, not the proxy ABI
-  // The proxy forwards calls to the implementation, so the frontend needs the implementation ABI
-  const implementationArtifact = await hre.artifacts.readArtifact("Unlloo");
+  // CRITICAL: Save the deployment with a merged ABI (UnllooCore + UnllooExt) under the "Unlloo" name.
+  // The proxy delegates unrecognised selectors to UnllooExt, so the frontend needs both ABIs merged.
+  const coreArtifact = await hre.artifacts.readArtifact("UnllooCore");
+  const extArtifact = await hre.artifacts.readArtifact("UnllooExt");
+
+  // Merge: start with Core ABI, append Ext entries whose selector isn't already present.
+  const coreSelectors = new Set(
+    coreArtifact.abi
+      .filter((f: { type: string; name?: string }) => f.type === "function")
+      .map(
+        (f: { name: string; inputs?: { type: string }[] }) =>
+          `${f.name}(${(f.inputs ?? []).map((i: { type: string }) => i.type).join(",")})`,
+      ),
+  );
+  const mergedAbi = [
+    ...coreArtifact.abi,
+    ...extArtifact.abi.filter(
+      (f: { type: string; name?: string; inputs?: { type: string }[] }) =>
+        f.type !== "function" ||
+        !coreSelectors.has(`${f.name}(${(f.inputs ?? []).map((i: { type: string }) => i.type).join(",")})`),
+    ),
+  ];
+
   await hre.deployments.save("Unlloo", {
     address: unllooProxy.address,
-    abi: implementationArtifact.abi,
+    abi: mergedAbi,
     transactionHash: unllooProxy.receipt?.transactionHash,
     args: [unllooImpl.address, initData],
     libraries: {},
     metadata: unllooProxy.metadata,
     receipt: unllooProxy.receipt,
   });
-  console.log(`   ✅ Updated Unlloo deployment with implementation ABI\n`);
+  console.log(`   ✅ Saved "Unlloo" deployment with merged Core+Ext ABI at ${unllooProxy.address}\n`);
 
   // Post-deploy checks against proxy address
   await verifyContractInteractions(hre, unllooProxy.address, {
@@ -695,6 +753,7 @@ const deployUnlloo: DeployFunction = async function (hre: HardhatRuntimeEnvironm
     blockTimeSeconds: config.blockTimeSeconds,
     minLoanAmount: defaultMinLoanAmount,
     maxLoanAmount: defaultMaxLoanAmount,
+    extensionDelegate: unllooExt.address,
   });
 
   await verifyDeployedContracts(hre, deploymentState, config);

@@ -8,14 +8,14 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20 } from "../typechain-types";
-import { setupUnllooTestFixture, UnllooTestContext } from "./fixtures/UnllooTestFixture";
+import { MockERC20 } from "../typechain-types";
+import { setupUnllooTestFixture, UnllooTestContext, UnllooCombined } from "./fixtures/UnllooTestFixture";
 import * as constants from "./fixtures/constants";
 import { setupCompleteBorrow, createAndApproveLoan, mintAndApproveUSDC, repayFully } from "./helpers";
 
 describe("Unlloo - Mark Loan Overdue", function () {
   let ctx: UnllooTestContext;
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let owner: HardhatEthersSigner;
   let borrower1: HardhatEthersSigner;

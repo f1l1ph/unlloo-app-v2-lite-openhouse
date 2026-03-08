@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { Unlloo, MockERC20, MockPriceFeed, UnllooProxy } from "../typechain-types";
+import { MockERC20, MockPriceFeed, UnllooProxy, UnllooExt } from "../typechain-types";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import * as constants from "./fixtures/constants";
+import { UnllooCombined } from "./fixtures/UnllooTestFixture";
 
 /**
  * @title Unlloo Economy Test Suite
@@ -17,7 +18,7 @@ import * as constants from "./fixtures/constants";
  */
 describe("Unlloo - Economy Tests", function () {
   // Contract instances
-  let unlloo: Unlloo;
+  let unlloo: UnllooCombined;
   let usdc: MockERC20;
   let priceFeed: MockPriceFeed;
 
@@ -127,10 +128,18 @@ describe("Unlloo - Economy Tests", function () {
     // Deploy Unlloo implementation
     // REMOVED: InterestCalculator no longer exists - contract uses simple interest internally
     const usdcAddress = await usdc.getAddress();
-    const UnllooFactory = await ethers.getContractFactory("Unlloo");
+
+    // Deploy UnllooExt
+    const UnllooExtFactory = await ethers.getContractFactory("UnllooExt");
+    const unllooExt = (await UnllooExtFactory.deploy({
+      gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
+    })) as UnllooExt;
+    await unllooExt.waitForDeployment();
+
+    const UnllooFactory = await ethers.getContractFactory("UnllooCore");
     const unllooImpl = (await UnllooFactory.deploy({
       gasLimit: constants.DEPLOYMENT_GAS_LIMIT,
-    })) as Unlloo;
+    })) as unknown as UnllooCombined;
     await unllooImpl.waitForDeployment();
 
     // Initialize via proxy
@@ -143,6 +152,7 @@ describe("Unlloo - Economy Tests", function () {
       owner.address,
       minLoanAmount,
       maxLoanAmount,
+      await unllooExt.getAddress(),
     ]);
 
     const UnllooProxyFactory = await ethers.getContractFactory("UnllooProxy");
@@ -151,7 +161,15 @@ describe("Unlloo - Economy Tests", function () {
     })) as UnllooProxy;
     await proxy.waitForDeployment();
 
-    unlloo = UnllooFactory.attach(await proxy.getAddress()) as Unlloo;
+    const proxyAddress = await proxy.getAddress();
+    const mergedAbi = [
+      ...UnllooFactory.interface.fragments,
+      ...UnllooExtFactory.interface.fragments.filter((extFrag: any) => {
+        if (extFrag.type !== "function") return true;
+        return UnllooFactory.interface.getFunction(extFrag.selector) === null;
+      }),
+    ];
+    unlloo = new ethers.Contract(proxyAddress, mergedAbi, owner) as unknown as UnllooCombined;
 
     // Mine blocks to allow new users to submit requests
     await mine(await unlloo.cooldownBlocks());
@@ -301,7 +319,7 @@ describe("Unlloo - Economy Tests", function () {
       // Now repay fully - wait a bit more to ensure interest accrues
       await mine(1); // Mine one more block to ensure state is updated
 
-      const remainingBalance = await unlloo.getRemainingBalance(loanId);
+      const remainingBalance = await unlloo.getTotalOwed(loanId);
       const repayAmount = remainingBalance + 1_000_000n;
       await mintAndApproveUSDC(borrower1, repayAmount);
       await unlloo.connect(borrower1).repay(loanId, repayAmount, { gasLimit: constants.COVERAGE_GAS_LIMIT });
