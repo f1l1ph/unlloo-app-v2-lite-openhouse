@@ -444,23 +444,9 @@ contract UnllooExt is UnllooStorage {
         return (minLoanAmountPerPool[token], maxLoanAmountPerPool[token]);
     }
 
-    // ============ Guarantor Admin ============
-
-    /// @notice Admin updates the block grace period before bond seizure is allowed (admin only)
-    function updateGuarantorGracePeriod(uint256 newGracePeriodBlocks) external onlyOwner {
-        uint256 minGrace = SECONDS_PER_DAY / blockTimeSeconds;
-        uint256 maxGrace = (SECONDS_PER_DAY * 30) / blockTimeSeconds;
-        if (newGracePeriodBlocks < minGrace || newGracePeriodBlocks > maxGrace) {
-            revert UnllooErrors.InvalidDuration(newGracePeriodBlocks, minGrace, maxGrace);
-        }
-        uint256 old = guarantorGracePeriodBlocks;
-        guarantorGracePeriodBlocks = newGracePeriodBlocks;
-        emit IUnlloo.GuarantorGracePeriodUpdated(old, newGracePeriodBlocks, block.number);
-    }
-
     // ============ Guarantor View Functions ============
 
-    /// @notice Get the guarantee bond between a borrower and a specific guarantor
+    /// @notice Get the guarantee record between a borrower and a specific guarantor
     function getGuaranteeBond(address borrower, address guarantor) external view returns (IUnlloo.GuaranteeBond memory) {
         return guaranteeBonds[borrower][guarantor];
     }
@@ -478,17 +464,6 @@ contract UnllooExt is UnllooStorage {
     /// @notice Check whether a borrower has at least one active guarantor
     function isGuaranteed(address borrower) external view returns (bool) {
         return _guarantorsForBorrower[borrower].length > 0;
-    }
-
-    /// @notice Get the total collateral locked by a guarantor for a specific token
-    function getTotalLockedByGuarantor(address guarantor, address token) external view returns (uint256 total) {
-        address[] storage borrowers = _guaranteesByGuarantor[guarantor];
-        for (uint256 i = 0; i < borrowers.length; i++) {
-            IUnlloo.GuaranteeBond storage bond = guaranteeBonds[borrowers[i]][guarantor];
-            if (bond.active && bond.token == token) {
-                total += bond.lockedAmount;
-            }
-        }
     }
 
 }

@@ -169,9 +169,6 @@ contract UnllooCore is UnllooStorage {
 
         // Store extension delegate
         extensionDelegate = _extensionDelegate;
-
-        // Initialize guarantor grace period to 7 days
-        guarantorGracePeriodBlocks = (SECONDS_PER_DAY * 7) / blockTimeSecondsValue;
     }
 
     // ============ Extension Management ============
@@ -885,41 +882,19 @@ contract UnllooCore is UnllooStorage {
     // ============ Guarantor Functions ============
 
     /**
-     * @notice Guarantor locks 100% collateral to back a borrower.
-     * @dev Transfers collateralAmount from msg.sender to this contract.
-     *      collateralAmount must be >= maxCoverageAmount (100% coverage required).
+     * @notice Register as a guarantor for a borrower. No collateral required.
+     * @dev Simply records the relationship. The guarantor can later call payOnBehalf().
      * @param borrower Address of the borrower being backed
-     * @param token ERC20 token address for the collateral (must be a valid pool token)
-     * @param collateralAmount Amount to lock as collateral
-     * @param maxCoverageAmount Maximum loan amount this bond will cover
      */
-    function registerGuarantee(
-        address borrower,
-        address token,
-        uint256 collateralAmount,
-        uint256 maxCoverageAmount
-    ) external whenNotPaused nonReentrant {
+    function registerGuarantee(address borrower) external whenNotPaused {
         if (msg.sender == borrower) revert UnllooErrors.CannotGuaranteeSelf();
         if (borrower == address(0)) revert UnllooErrors.InvalidAddress(borrower);
-        _requireValidPool(token);
-        if (collateralAmount == 0) revert UnllooErrors.InvalidAmount(collateralAmount, 1, type(uint256).max);
-        if (maxCoverageAmount == 0) revert UnllooErrors.InvalidAmount(maxCoverageAmount, 1, type(uint256).max);
-        if (collateralAmount < maxCoverageAmount)
-            revert UnllooErrors.InsufficientBondCoverage(maxCoverageAmount, collateralAmount);
 
         IUnlloo.GuaranteeBond storage bond = guaranteeBonds[borrower][msg.sender];
         if (bond.active) revert UnllooErrors.GuaranteeAlreadyExists(msg.sender, borrower);
 
-        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
-        if (allowance < collateralAmount) revert UnllooErrors.InsufficientAllowance(collateralAmount, allowance);
-
-        _safeTransferFromExact(token, msg.sender, address(this), collateralAmount);
-
         bond.guarantor = msg.sender;
         bond.borrower = borrower;
-        bond.token = token;
-        bond.lockedAmount = collateralAmount;
-        bond.maxCoverageAmount = maxCoverageAmount;
         bond.active = true;
 
         _guaranteeIndex[msg.sender][borrower] = _guaranteesByGuarantor[msg.sender].length;
@@ -928,131 +903,62 @@ contract UnllooCore is UnllooStorage {
         _guarantorIndex[borrower][msg.sender] = _guarantorsForBorrower[borrower].length;
         _guarantorsForBorrower[borrower].push(msg.sender);
 
-        emit IUnlloo.GuaranteeRegistered(msg.sender, borrower, token, collateralAmount, maxCoverageAmount, block.number);
+        emit IUnlloo.GuaranteeRegistered(msg.sender, borrower, block.number);
     }
 
     /**
-     * @notice Guarantor removes their bond and reclaims locked collateral.
-     * @dev Reverts if borrower has an active or unpaid loan — guarantor must stay until debt is cleared.
+     * @notice Remove guarantee. Reverts if borrower has an active or unpaid loan.
      * @param borrower Address of the backed borrower
      */
-    function removeGuarantee(address borrower) external nonReentrant {
+    function removeGuarantee(address borrower) external {
         IUnlloo.GuaranteeBond storage bond = guaranteeBonds[borrower][msg.sender];
-        if (!bond.active) revert UnllooErrors.BondNotActive(msg.sender, borrower);
+        if (!bond.active) revert UnllooErrors.GuaranteeNotFound(msg.sender, borrower);
 
         if (_activeLoanByBorrower[borrower] != 0) revert UnllooErrors.BorrowerHasOpenLoan(borrower);
         if (unpaidDebtLoanCount[borrower] != 0) revert UnllooErrors.BorrowerHasOpenLoan(borrower);
 
-        uint256 refundAmount = bond.lockedAmount;
-        address token = bond.token;
-
         _removeGuaranteeFromArrays(msg.sender, borrower);
         delete guaranteeBonds[borrower][msg.sender];
 
-        if (refundAmount > 0) {
-            _safeTransferExact(token, msg.sender, refundAmount);
-        }
-
-        emit IUnlloo.GuaranteeRemoved(msg.sender, borrower, refundAmount, block.number);
+        emit IUnlloo.GuaranteeRemoved(msg.sender, borrower, block.number);
     }
 
     /**
-     * @notice Guarantor voluntarily covers a defaulted borrower's outstanding debt.
-     * @dev The bond's locked collateral is used to repay — no additional token transfer needed.
-     *      Any leftover collateral after full repayment is returned to the guarantor.
-     * @param loanId ID of the Active or UnpaidDebt loan to cover
+     * @notice Guarantor pays on behalf of a borrower. Tokens are pulled from the guarantor's wallet.
+     * @dev Works like repay() but caller must be a registered guarantor for the loan's borrower.
+     * @param loanId ID of the Active or UnpaidDebt loan to pay
+     * @param amount Amount to pay in token decimals
      */
-    function guarantorCoverDebt(uint256 loanId) external nonReentrant loanExists(loanId) {
+    function payOnBehalf(uint256 loanId, uint256 amount) external nonReentrant loanExists(loanId) {
         IUnlloo.Loan storage loan = loans[loanId];
 
-        if (loan.status != IUnlloo.LoanStatus.UnpaidDebt && loan.status != IUnlloo.LoanStatus.Active)
-            revert UnllooErrors.InvalidLoanStatus(uint8(loan.status), uint8(IUnlloo.LoanStatus.UnpaidDebt));
+        if (loan.status != IUnlloo.LoanStatus.Active && loan.status != IUnlloo.LoanStatus.UnpaidDebt)
+            revert UnllooErrors.InvalidLoanStatus(uint8(loan.status), uint8(IUnlloo.LoanStatus.Active));
 
         address borrower = loan.borrower;
-        IUnlloo.GuaranteeBond storage bond = guaranteeBonds[borrower][msg.sender];
-        if (!bond.active) revert UnllooErrors.BondNotActive(msg.sender, borrower);
+        if (!guaranteeBonds[borrower][msg.sender].active)
+            revert UnllooErrors.NotAGuarantor(msg.sender, borrower);
+
+        if (amount == 0) revert UnllooErrors.InvalidAmount(0, 1, type(uint256).max);
+
+        address token = loan.token;
+        uint256 allowance = IERC20(token).allowance(msg.sender, address(this));
+        if (allowance < amount) revert UnllooErrors.InsufficientAllowance(amount, allowance);
+
+        _safeTransferFromExact(token, msg.sender, address(this), amount);
 
         _accrueLoanInterest(loanId);
         _checkAndTransitionOverdue(loanId, loan);
 
-        uint256 totalOwed = loan.principal + loan.interestAccrued;
-        if (totalOwed == 0) revert UnllooErrors.InvalidAmount(0, 1, type(uint256).max);
-
-        uint256 coverAmount = totalOwed > bond.lockedAmount ? bond.lockedAmount : totalOwed;
-
-        (uint256 payAmount, uint256 interestPayment, uint256 principalPayment) = _calculateRepaymentSplit(loan, coverAmount);
+        (uint256 payAmount, uint256 interestPayment, uint256 principalPayment) = _calculateRepaymentSplit(loan, amount);
 
         if (interestPayment > 0) _processInterestPayment(loan, interestPayment);
         loan.amountRepaid += payAmount;
         if (principalPayment > 0) _applyPrincipalPayment(loan, principalPayment);
 
-        bond.lockedAmount -= payAmount;
-
         _checkAndFinalizeRepayment(loanId, loan);
 
-        // If bond exhausted or loan fully repaid, close the bond
-        if (bond.lockedAmount == 0 || loan.status == IUnlloo.LoanStatus.Repaid) {
-            uint256 leftover = bond.lockedAmount;
-            address token = bond.token;
-            _removeGuaranteeFromArrays(msg.sender, borrower);
-            delete guaranteeBonds[borrower][msg.sender];
-            if (leftover > 0) {
-                _safeTransferExact(token, msg.sender, leftover);
-            }
-        }
-
-        emit IUnlloo.GuarantorCoveredDebt(loanId, msg.sender, borrower, payAmount, block.number);
-    }
-
-    /**
-     * @notice Admin seizes a guarantor bond to cover a defaulted loan after the grace period.
-     * @dev Only callable by owner. Grace period starts at loan.deadlineBlock.
-     *      Uses the bond's locked collateral as repayment — no token transfer to contract needed.
-     *      Any leftover collateral is returned to the guarantor.
-     * @param loanId ID of the defaulted (UnpaidDebt) loan
-     * @param guarantor Address of the guarantor whose bond to seize
-     */
-    function seizeGuarantorBond(uint256 loanId, address guarantor) external onlyOwner nonReentrant loanExists(loanId) {
-        IUnlloo.Loan storage loan = loans[loanId];
-
-        if (loan.status != IUnlloo.LoanStatus.UnpaidDebt && loan.status != IUnlloo.LoanStatus.Active)
-            revert UnllooErrors.InvalidLoanStatus(uint8(loan.status), uint8(IUnlloo.LoanStatus.UnpaidDebt));
-
-        address borrower = loan.borrower;
-        IUnlloo.GuaranteeBond storage bond = guaranteeBonds[borrower][guarantor];
-        if (!bond.active) revert UnllooErrors.BondNotActive(guarantor, borrower);
-
-        uint256 deadline = loan.deadlineBlock != 0 ? loan.deadlineBlock : (loan.startBlock + loan.loanDurationBlocks);
-        uint256 gracePeriodEnd = deadline + guarantorGracePeriodBlocks;
-        if (block.number < gracePeriodEnd) revert UnllooErrors.GracePeriodNotExpired(block.number, gracePeriodEnd);
-
-        _accrueLoanInterest(loanId);
-        _checkAndTransitionOverdue(loanId, loan);
-
-        uint256 totalOwed = loan.principal + loan.interestAccrued;
-        uint256 seizeAmount = totalOwed > bond.lockedAmount ? bond.lockedAmount : totalOwed;
-
-        (uint256 payAmount, uint256 interestPayment, uint256 principalPayment) = _calculateRepaymentSplit(loan, seizeAmount);
-
-        if (interestPayment > 0) _processInterestPayment(loan, interestPayment);
-        loan.amountRepaid += payAmount;
-        if (principalPayment > 0) _applyPrincipalPayment(loan, principalPayment);
-
-        bond.lockedAmount -= payAmount;
-
-        uint256 leftover = bond.lockedAmount;
-        address token = bond.token;
-
-        _checkAndFinalizeRepayment(loanId, loan);
-
-        _removeGuaranteeFromArrays(guarantor, borrower);
-        delete guaranteeBonds[borrower][guarantor];
-
-        if (leftover > 0) {
-            _safeTransferExact(token, guarantor, leftover);
-        }
-
-        emit IUnlloo.GuarantorBondSeized(loanId, guarantor, borrower, payAmount, block.number);
+        emit IUnlloo.GuarantorPaidOnBehalf(loanId, msg.sender, borrower, payAmount, block.number);
     }
 
     // ============ Internal: Guarantor Helpers ============

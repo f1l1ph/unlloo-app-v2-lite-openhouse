@@ -7,9 +7,6 @@ import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaf
 export interface GuaranteeBond {
   guarantor: Address;
   borrower: Address;
-  token: Address;
-  lockedAmount: bigint;
-  maxCoverageAmount: bigint;
   active: boolean;
 }
 
@@ -38,12 +35,6 @@ export const useGuarantees = () => {
     query: { enabled: Boolean(address) },
   });
 
-  // Grace period
-  const { data: gracePeriodBlocks } = useScaffoldReadContract({
-    contractName: "Unlloo",
-    functionName: "guarantorGracePeriodBlocks",
-  });
-
   const invalidate = useCallback(async () => {
     if (publicClient) {
       const current = await publicClient.getBlockNumber();
@@ -62,10 +53,10 @@ export const useGuarantees = () => {
   }, [publicClient, queryClient, refetchBorrowers, refetchMyGuarantors]);
 
   const registerGuarantee = useCallback(
-    async (borrower: Address, token: Address, collateralAmount: bigint, maxCoverageAmount: bigint) => {
+    async (borrower: Address) => {
       await writeContractAsync({
         functionName: "registerGuarantee",
-        args: [borrower, token, collateralAmount, maxCoverageAmount],
+        args: [borrower],
       });
       await invalidate();
     },
@@ -83,11 +74,11 @@ export const useGuarantees = () => {
     [writeContractAsync, invalidate],
   );
 
-  const coverDebt = useCallback(
-    async (loanId: bigint) => {
+  const payOnBehalf = useCallback(
+    async (loanId: bigint, amount: bigint) => {
       await writeContractAsync({
-        functionName: "guarantorCoverDebt",
-        args: [loanId],
+        functionName: "payOnBehalf",
+        args: [loanId, amount],
       });
       await invalidate();
     },
@@ -97,10 +88,9 @@ export const useGuarantees = () => {
   return {
     guaranteedBorrowers: (guaranteedBorrowers as Address[] | undefined) ?? [],
     myGuarantors: (myGuarantors as Address[] | undefined) ?? [],
-    gracePeriodBlocks: gracePeriodBlocks as bigint | undefined,
     registerGuarantee,
     removeGuarantee,
-    coverDebt,
+    payOnBehalf,
     refetch: invalidate,
   };
 };

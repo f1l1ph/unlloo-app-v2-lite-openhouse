@@ -7,7 +7,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 const deployedContracts = {
   46630: {
     MockERC20: {
-      address: "0xbfAce6A41B79A42c5174DaFC7054D4FF2df899b8",
+      address: "0xF823c33063234885ca7D2f86bb30aBb03012913e",
       abi: [
         {
           inputs: [
@@ -386,26 +386,15 @@ const deployedContracts = {
         transfer: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
         transferFrom: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       },
-      deployedOnBlock: 9517488,
+      deployedOnBlock: 9924702,
     },
     Unlloo: {
-      address: "0x323BBF8f4B916982DeF5E594a975BE69dBaeD2bC",
+      address: "0x1Ca39eDe9c2f77281b58f84316715346456038d1",
       abi: [
         {
           inputs: [],
           stateMutability: "nonpayable",
           type: "constructor",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "ActiveLoansUsingPool",
-          type: "error",
         },
         {
           inputs: [
@@ -453,6 +442,22 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "BorrowerHasOpenLoan",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CannotGuaranteeSelf",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
               name: "user",
               type: "address",
             },
@@ -484,6 +489,38 @@ const deployedContracts = {
         {
           inputs: [],
           name: "ExpectedPause",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "GuaranteeAlreadyExists",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "GuaranteeNotFound",
           type: "error",
         },
         {
@@ -538,6 +575,17 @@ const deployedContracts = {
             },
           ],
           name: "InsufficientLiquidity",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "addr",
+              type: "address",
+            },
+          ],
+          name: "InvalidAddress",
           type: "error",
         },
         {
@@ -666,27 +714,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "paramName",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "value",
-              type: "uint256",
-            },
-          ],
-          name: "InvalidRateCurveParam",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
               internalType: "uint16",
               name: "reputation",
               type: "uint16",
@@ -725,6 +752,22 @@ const deployedContracts = {
             },
           ],
           name: "LoanNotFound",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "caller",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "NotAGuarantor",
           type: "error",
         },
         {
@@ -787,28 +830,6 @@ const deployedContracts = {
           type: "error",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "PoolExists",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "PoolNotEmpty",
-          type: "error",
-        },
-        {
           inputs: [],
           name: "ReentrancyGuardReentrantCall",
           type: "error",
@@ -834,31 +855,6 @@ const deployedContracts = {
           ],
           name: "UnsupportedTokenTransfer",
           type: "error",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "oldCooldownBlocks",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "newCooldownBlocks",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "blockNumber",
-              type: "uint256",
-            },
-          ],
-          name: "CooldownBlocksUpdated",
-          type: "event",
         },
         {
           anonymous: false,
@@ -891,14 +887,14 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "admin",
+              name: "oldExtension",
               type: "address",
             },
             {
-              indexed: false,
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
+              indexed: true,
+              internalType: "address",
+              name: "newExtension",
+              type: "address",
             },
             {
               indexed: false,
@@ -907,7 +903,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "ETHWithdrawn",
+          name: "ExtensionUpdated",
           type: "event",
         },
         {
@@ -916,13 +912,75 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "token",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
               type: "address",
             },
             {
               indexed: false,
               internalType: "uint256",
-              name: "amount",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "GuaranteeRegistered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "GuaranteeRemoved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amountPaid",
               type: "uint256",
             },
             {
@@ -932,7 +990,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "EmergencyWithdraw",
+          name: "GuarantorPaidOnBehalf",
           type: "event",
         },
         {
@@ -946,55 +1004,6 @@ const deployedContracts = {
             },
           ],
           name: "Initialized",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "baseRateBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "optimalUtilizationBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "slope1Bps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "slope2Bps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "protocolFeeBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "blockNumber",
-              type: "uint256",
-            },
-          ],
-          name: "InterestRatesUpdated",
           type: "event",
         },
         {
@@ -1157,7 +1166,7 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "borrower",
+              name: "payer",
               type: "address",
             },
             {
@@ -1186,31 +1195,6 @@ const deployedContracts = {
             },
           ],
           name: "LoanRepaid",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "borrower",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "approvalBlock",
-              type: "uint256",
-            },
-          ],
-          name: "LoanRequestApproved",
           type: "event",
         },
         {
@@ -1279,6 +1263,1531 @@ const deployedContracts = {
             },
           ],
           name: "LoanRequestSubmitted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Paused",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Unpaused",
+          type: "event",
+        },
+        {
+          stateMutability: "payable",
+          type: "fallback",
+        },
+        {
+          inputs: [],
+          name: "MAX_BLOCKS_FOR_INTEREST",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_BORROWER_RATE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_PENDING_LOANS_PER_USER",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_BORROWER_RATE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "activeLenderCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "activeLoansPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "approvedLoanExpiryBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "blockTimeSeconds",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenAmount",
+              type: "uint256",
+            },
+          ],
+          name: "borrow",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "cooldownBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "defaultToken",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "depositLiquidity",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "expireApprovedLoan",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "extensionDelegate",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "getApprovedLoanAmount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "approvedAmount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "lender",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "getLenderPosition",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "depositedAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "accruedInterest",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "totalWithdrawable",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "guaranteeBonds",
+          outputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "active",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "hasUnpaidDebt",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_defaultToken",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "blockTimeSecondsValue",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "initialOwner",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_defaultMinLoanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_defaultMaxLoanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_extensionDelegate",
+              type: "address",
+            },
+          ],
+          name: "initialize",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lastRequestBlock",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderAccruedInterest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderPositions",
+          outputs: [
+            {
+              internalType: "address",
+              name: "lender",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "depositedAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "depositBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lastWithdrawBlock",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderSupplyIndex",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "loanCounter",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "loanInitialPrincipal",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "loans",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              internalType: "enum IUnlloo.LoanStatus",
+              name: "status",
+              type: "uint8",
+            },
+            {
+              internalType: "uint16",
+              name: "walletReputation",
+              type: "uint16",
+            },
+            {
+              internalType: "uint256",
+              name: "loanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "loanDurationBlocks",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "chainId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "requestBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "approvalBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "principal",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amountRepaid",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "startBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "deadlineBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "protocolFee",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "interestAccrued",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "borrowRateBps",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lastAccrualBlock",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "markLoanOverdue",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "maxLoanAmountPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "maxLoanDurationBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "minLoanAmountPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "minLoanDurationBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "minReputation",
+          outputs: [
+            {
+              internalType: "uint16",
+              name: "",
+              type: "uint16",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "openRequestCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "paused",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "payOnBehalf",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "poolSupplyIndex",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "poolUndistributedInterest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "pools",
+          outputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "totalLiquidity",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "borrowedAmount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "protocolFees",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "registerGuarantee",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "removeGuarantee",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "repay",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newExtension",
+              type: "address",
+            },
+          ],
+          name: "setExtension",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint16",
+              name: "walletReputation",
+              type: "uint16",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "loanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "loanDurationBlocks",
+              type: "uint256",
+            },
+          ],
+          name: "submitLoanRequest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "unpaidDebtLoanCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "unpaidDebtLoansPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "withdrawLiquidity",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "ActiveLoansUsingPool",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "EnforcedPause",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ExpectedPause",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "HasActiveLoan",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "HasUnpaidDebt",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "min",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "max",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidAmount",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "blockTime",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidBlockTime",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "duration",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "min",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "max",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidDuration",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "InvalidInitialization",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint8",
+              name: "current",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "required",
+              type: "uint8",
+            },
+          ],
+          name: "InvalidLoanStatus",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "InvalidPool",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "minAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "maxAmount",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidPoolLoanLimits",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "paramName",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidRateCurveParam",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint16",
+              name: "reputation",
+              type: "uint16",
+            },
+            {
+              internalType: "uint16",
+              name: "min",
+              type: "uint16",
+            },
+          ],
+          name: "InvalidReputation",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint8",
+              name: "status",
+              type: "uint8",
+            },
+          ],
+          name: "LoanAlreadyInStatus",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "LoanNotFound",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NotInitializing",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "PoolExists",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "PoolNotEmpty",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "SafeERC20FailedOperation",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "UnsupportedTokenTransfer",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldCooldownBlocks",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newCooldownBlocks",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "CooldownBlocksUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "admin",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "ETHWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "EmergencyWithdraw",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "version",
+              type: "uint64",
+            },
+          ],
+          name: "Initialized",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "baseRateBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "optimalUtilizationBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "slope1Bps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "slope2Bps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "protocolFeeBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "InterestRatesUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "approvalBlock",
+              type: "uint256",
+            },
+          ],
+          name: "LoanRequestApproved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "rejectionBlock",
+              type: "uint256",
+            },
+          ],
+          name: "LoanRequestRejected",
           type: "event",
         },
         {
@@ -1452,96 +2961,6 @@ const deployedContracts = {
           type: "event",
         },
         {
-          inputs: [],
-          name: "MAX_BLOCKS_FOR_INTEREST",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MAX_BORROWER_RATE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MAX_PENDING_LOANS_PER_USER",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "MIN_BORROWER_RATE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "activeLenderCount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "activeLoansPerPool",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "address",
@@ -1573,50 +2992,6 @@ const deployedContracts = {
             },
           ],
           name: "approveLoanRequest",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "approvedLoanExpiryBlocks",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "blockTimeSeconds",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "tokenAmount",
-              type: "uint256",
-            },
-          ],
-          name: "borrow",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1679,50 +3054,6 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "cooldownBlocks",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "defaultToken",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
-          name: "depositLiquidity",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "address",
@@ -1736,19 +3067,6 @@ const deployedContracts = {
             },
           ],
           name: "emergencyWithdraw",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          name: "expireApprovedLoan",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1813,25 +3131,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          name: "getApprovedLoanAmount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "approvedAmount",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "user",
               type: "address",
@@ -1852,31 +3151,76 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "lender",
+              name: "borrower",
               type: "address",
             },
             {
               internalType: "address",
-              name: "token",
+              name: "guarantor",
               type: "address",
             },
           ],
-          name: "getLenderPosition",
+          name: "getGuaranteeBond",
           outputs: [
             {
-              internalType: "uint256",
-              name: "depositedAmount",
-              type: "uint256",
+              components: [
+                {
+                  internalType: "address",
+                  name: "guarantor",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "borrower",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "active",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct IUnlloo.GuaranteeBond",
+              name: "",
+              type: "tuple",
             },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
             {
-              internalType: "uint256",
-              name: "accruedInterest",
-              type: "uint256",
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
             },
+          ],
+          name: "getGuaranteesByGuarantor",
+          outputs: [
             {
-              internalType: "uint256",
-              name: "totalWithdrawable",
-              type: "uint256",
+              internalType: "address[]",
+              name: "borrowers",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "getGuarantorsForBorrower",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
             },
           ],
           stateMutability: "view",
@@ -2208,296 +3552,16 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "user",
+              name: "borrower",
               type: "address",
             },
           ],
-          name: "hasUnpaidDebt",
+          name: "isGuaranteed",
           outputs: [
             {
               internalType: "bool",
               name: "",
               type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_defaultToken",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "blockTimeSecondsValue",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "initialOwner",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "_defaultMinLoanAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "_defaultMaxLoanAmount",
-              type: "uint256",
-            },
-          ],
-          name: "initialize",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "lastRequestBlock",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "lenderAccruedInterest",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "lenderPositions",
-          outputs: [
-            {
-              internalType: "address",
-              name: "lender",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "depositedAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "depositBlock",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "lastWithdrawBlock",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "lenderSupplyIndex",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "loanCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          name: "loanInitialPrincipal",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          name: "loans",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "borrower",
-              type: "address",
-            },
-            {
-              internalType: "enum IUnlloo.LoanStatus",
-              name: "status",
-              type: "uint8",
-            },
-            {
-              internalType: "uint16",
-              name: "walletReputation",
-              type: "uint16",
-            },
-            {
-              internalType: "uint256",
-              name: "loanAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "loanDurationBlocks",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "chainId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "requestBlock",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "approvalBlock",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "principal",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amountRepaid",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "startBlock",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "deadlineBlock",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "protocolFee",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "interestAccrued",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "borrowRateBps",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "lastAccrualBlock",
-              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -2523,231 +3587,10 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          name: "markLoanOverdue",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "maxLoanAmountPerPool",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "maxLoanDurationBlocks",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "minLoanAmountPerPool",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "minLoanDurationBlocks",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "minReputation",
-          outputs: [
-            {
-              internalType: "uint16",
-              name: "",
-              type: "uint16",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "openRequestCount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [],
           name: "pause",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "paused",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "poolSupplyIndex",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "poolUndistributedInterest",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "pools",
-          outputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "totalLiquidity",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "borrowedAmount",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "protocolFees",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {
@@ -2774,116 +3617,6 @@ const deployedContracts = {
           name: "removeLiquidityPool",
           outputs: [],
           stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "renounceOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
-          name: "repay",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint16",
-              name: "walletReputation",
-              type: "uint16",
-            },
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "loanAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "loanDurationBlocks",
-              type: "uint256",
-            },
-          ],
-          name: "submitLoanRequest",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "newOwner",
-              type: "address",
-            },
-          ],
-          name: "transferOwnership",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "unpaidDebtLoanCount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "unpaidDebtLoansPerPool",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
           type: "function",
         },
         {
@@ -3006,55 +3739,22 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "withdrawLiquidity",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
           name: "withdrawProtocolFees",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
-        {
-          stateMutability: "payable",
-          type: "receive",
-        },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 9517648,
+      deployedOnBlock: 9925009,
     },
-    UnllooImplementation: {
-      address: "0x4786084CE9cda7FD7e64f723884e19564CFfaCf7",
+    UnllooCoreImplementation: {
+      address: "0x06d100657c8B572366309e3E26C54b139B48Ca1c",
       abi: [
         {
           inputs: [],
           stateMutability: "nonpayable",
           type: "constructor",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "ActiveLoansUsingPool",
-          type: "error",
         },
         {
           inputs: [
@@ -3102,6 +3802,22 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "BorrowerHasOpenLoan",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "CannotGuaranteeSelf",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
               name: "user",
               type: "address",
             },
@@ -3133,6 +3849,38 @@ const deployedContracts = {
         {
           inputs: [],
           name: "ExpectedPause",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "GuaranteeAlreadyExists",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "GuaranteeNotFound",
           type: "error",
         },
         {
@@ -3187,6 +3935,17 @@ const deployedContracts = {
             },
           ],
           name: "InsufficientLiquidity",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "addr",
+              type: "address",
+            },
+          ],
+          name: "InvalidAddress",
           type: "error",
         },
         {
@@ -3315,27 +4074,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "paramName",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "value",
-              type: "uint256",
-            },
-          ],
-          name: "InvalidRateCurveParam",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
               internalType: "uint16",
               name: "reputation",
               type: "uint16",
@@ -3374,6 +4112,22 @@ const deployedContracts = {
             },
           ],
           name: "LoanNotFound",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "caller",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "NotAGuarantor",
           type: "error",
         },
         {
@@ -3436,28 +4190,6 @@ const deployedContracts = {
           type: "error",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "PoolExists",
-          type: "error",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-          ],
-          name: "PoolNotEmpty",
-          type: "error",
-        },
-        {
           inputs: [],
           name: "ReentrancyGuardReentrantCall",
           type: "error",
@@ -3483,31 +4215,6 @@ const deployedContracts = {
           ],
           name: "UnsupportedTokenTransfer",
           type: "error",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "oldCooldownBlocks",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "newCooldownBlocks",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "blockNumber",
-              type: "uint256",
-            },
-          ],
-          name: "CooldownBlocksUpdated",
-          type: "event",
         },
         {
           anonymous: false,
@@ -3540,14 +4247,14 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "admin",
+              name: "oldExtension",
               type: "address",
             },
             {
-              indexed: false,
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
+              indexed: true,
+              internalType: "address",
+              name: "newExtension",
+              type: "address",
             },
             {
               indexed: false,
@@ -3556,7 +4263,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "ETHWithdrawn",
+          name: "ExtensionUpdated",
           type: "event",
         },
         {
@@ -3565,13 +4272,75 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "token",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
               type: "address",
             },
             {
               indexed: false,
               internalType: "uint256",
-              name: "amount",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "GuaranteeRegistered",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "GuaranteeRemoved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amountPaid",
               type: "uint256",
             },
             {
@@ -3581,7 +4350,7 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "EmergencyWithdraw",
+          name: "GuarantorPaidOnBehalf",
           type: "event",
         },
         {
@@ -3595,55 +4364,6 @@ const deployedContracts = {
             },
           ],
           name: "Initialized",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "baseRateBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "optimalUtilizationBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "slope1Bps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "slope2Bps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "protocolFeeBps",
-              type: "uint256",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "blockNumber",
-              type: "uint256",
-            },
-          ],
-          name: "InterestRatesUpdated",
           type: "event",
         },
         {
@@ -3806,7 +4526,7 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "borrower",
+              name: "payer",
               type: "address",
             },
             {
@@ -3835,31 +4555,6 @@ const deployedContracts = {
             },
           ],
           name: "LoanRepaid",
-          type: "event",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "borrower",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "approvalBlock",
-              type: "uint256",
-            },
-          ],
-          name: "LoanRequestApproved",
           type: "event",
         },
         {
@@ -3928,6 +4623,1538 @@ const deployedContracts = {
             },
           ],
           name: "LoanRequestSubmitted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Paused",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Unpaused",
+          type: "event",
+        },
+        {
+          stateMutability: "payable",
+          type: "fallback",
+        },
+        {
+          inputs: [],
+          name: "MAX_BLOCKS_FOR_INTEREST",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_BORROWER_RATE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_PENDING_LOANS_PER_USER",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MIN_BORROWER_RATE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "activeLenderCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "activeLoansPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "approvedLoanExpiryBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "blockTimeSeconds",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenAmount",
+              type: "uint256",
+            },
+          ],
+          name: "borrow",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "cooldownBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "defaultToken",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "depositLiquidity",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "expireApprovedLoan",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "extensionDelegate",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "getApprovedLoanAmount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "approvedAmount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "lender",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "getLenderPosition",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "depositedAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "accruedInterest",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "totalWithdrawable",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "guaranteeBonds",
+          outputs: [
+            {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              internalType: "bool",
+              name: "active",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "hasUnpaidDebt",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_defaultToken",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "blockTimeSecondsValue",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "initialOwner",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "_defaultMinLoanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "_defaultMaxLoanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "_extensionDelegate",
+              type: "address",
+            },
+          ],
+          name: "initialize",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lastRequestBlock",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderAccruedInterest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderPositions",
+          outputs: [
+            {
+              internalType: "address",
+              name: "lender",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "depositedAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "depositBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lastWithdrawBlock",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "lenderSupplyIndex",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "loanCounter",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "loanInitialPrincipal",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "loans",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              internalType: "enum IUnlloo.LoanStatus",
+              name: "status",
+              type: "uint8",
+            },
+            {
+              internalType: "uint16",
+              name: "walletReputation",
+              type: "uint16",
+            },
+            {
+              internalType: "uint256",
+              name: "loanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "loanDurationBlocks",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "chainId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "requestBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "approvalBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "principal",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amountRepaid",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "startBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "deadlineBlock",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "protocolFee",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "interestAccrued",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "borrowRateBps",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "lastAccrualBlock",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "markLoanOverdue",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "maxLoanAmountPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "maxLoanDurationBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "minLoanAmountPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "minLoanDurationBlocks",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "minReputation",
+          outputs: [
+            {
+              internalType: "uint16",
+              name: "",
+              type: "uint16",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "openRequestCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "paused",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "payOnBehalf",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "poolSupplyIndex",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "poolUndistributedInterest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "pools",
+          outputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "totalLiquidity",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "borrowedAmount",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "protocolFees",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "registerGuarantee",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "removeGuarantee",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "repay",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newExtension",
+              type: "address",
+            },
+          ],
+          name: "setExtension",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint16",
+              name: "walletReputation",
+              type: "uint16",
+            },
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "loanAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "loanDurationBlocks",
+              type: "uint256",
+            },
+          ],
+          name: "submitLoanRequest",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "unpaidDebtLoanCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "unpaidDebtLoansPerPool",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "withdrawLiquidity",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
+        },
+      ],
+      inheritedFunctions: {},
+      deployedOnBlock: 9924880,
+    },
+    UnllooExtDeployment: {
+      address: "0xA28535f07EE1d35fdbd791607Fd2443b309Eb007",
+      abi: [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "ActiveLoansUsingPool",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "EnforcedPause",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ExpectedPause",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "HasActiveLoan",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "user",
+              type: "address",
+            },
+          ],
+          name: "HasUnpaidDebt",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "min",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "max",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidAmount",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "blockTime",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidBlockTime",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "duration",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "min",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "max",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidDuration",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "InvalidInitialization",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint8",
+              name: "current",
+              type: "uint8",
+            },
+            {
+              internalType: "uint8",
+              name: "required",
+              type: "uint8",
+            },
+          ],
+          name: "InvalidLoanStatus",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "InvalidPool",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "minAmount",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "maxAmount",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidPoolLoanLimits",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              internalType: "string",
+              name: "paramName",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+          ],
+          name: "InvalidRateCurveParam",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint16",
+              name: "reputation",
+              type: "uint16",
+            },
+            {
+              internalType: "uint16",
+              name: "min",
+              type: "uint16",
+            },
+          ],
+          name: "InvalidReputation",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint8",
+              name: "status",
+              type: "uint8",
+            },
+          ],
+          name: "LoanAlreadyInStatus",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+          ],
+          name: "LoanNotFound",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "NotInitializing",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+          ],
+          name: "OwnableInvalidOwner",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "OwnableUnauthorizedAccount",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "PoolExists",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "PoolNotEmpty",
+          type: "error",
+        },
+        {
+          inputs: [],
+          name: "ReentrancyGuardReentrantCall",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "SafeERC20FailedOperation",
+          type: "error",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+          ],
+          name: "UnsupportedTokenTransfer",
+          type: "error",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "oldCooldownBlocks",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "newCooldownBlocks",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "CooldownBlocksUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "admin",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "ETHWithdrawn",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "EmergencyWithdraw",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint64",
+              name: "version",
+              type: "uint64",
+            },
+          ],
+          name: "Initialized",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "token",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "baseRateBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "optimalUtilizationBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "slope1Bps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "slope2Bps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "protocolFeeBps",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "blockNumber",
+              type: "uint256",
+            },
+          ],
+          name: "InterestRatesUpdated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "approvalBlock",
+              type: "uint256",
+            },
+          ],
+          name: "LoanRequestApproved",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "loanId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "rejectionBlock",
+              type: "uint256",
+            },
+          ],
+          name: "LoanRequestRejected",
           type: "event",
         },
         {
@@ -4255,24 +6482,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "tokenAmount",
-              type: "uint256",
-            },
-          ],
-          name: "borrow",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "borrower",
               type: "address",
@@ -4366,40 +6575,22 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "depositLiquidity",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
           name: "emergencyWithdraw",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
-          inputs: [
+          inputs: [],
+          name: "extensionDelegate",
+          outputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
+              internalType: "address",
+              name: "",
+              type: "address",
             },
           ],
-          name: "expireApprovedLoan",
-          outputs: [],
-          stateMutability: "nonpayable",
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -4462,25 +6653,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          name: "getApprovedLoanAmount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "approvedAmount",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "user",
               type: "address",
@@ -4501,31 +6673,76 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "lender",
+              name: "borrower",
               type: "address",
             },
             {
               internalType: "address",
-              name: "token",
+              name: "guarantor",
               type: "address",
             },
           ],
-          name: "getLenderPosition",
+          name: "getGuaranteeBond",
           outputs: [
             {
-              internalType: "uint256",
-              name: "depositedAmount",
-              type: "uint256",
+              components: [
+                {
+                  internalType: "address",
+                  name: "guarantor",
+                  type: "address",
+                },
+                {
+                  internalType: "address",
+                  name: "borrower",
+                  type: "address",
+                },
+                {
+                  internalType: "bool",
+                  name: "active",
+                  type: "bool",
+                },
+              ],
+              internalType: "struct IUnlloo.GuaranteeBond",
+              name: "",
+              type: "tuple",
             },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
             {
-              internalType: "uint256",
-              name: "accruedInterest",
-              type: "uint256",
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
             },
+          ],
+          name: "getGuaranteesByGuarantor",
+          outputs: [
             {
-              internalType: "uint256",
-              name: "totalWithdrawable",
-              type: "uint256",
+              internalType: "address[]",
+              name: "borrowers",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+          ],
+          name: "getGuarantorsForBorrower",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
             },
           ],
           stateMutability: "view",
@@ -4857,15 +7074,30 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "user",
+              name: "",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "",
               type: "address",
             },
           ],
-          name: "hasUnpaidDebt",
+          name: "guaranteeBonds",
           outputs: [
             {
+              internalType: "address",
+              name: "guarantor",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "borrower",
+              type: "address",
+            },
+            {
               internalType: "bool",
-              name: "",
+              name: "active",
               type: "bool",
             },
           ],
@@ -4876,33 +7108,19 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "address",
-              name: "_defaultToken",
+              name: "borrower",
               type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "blockTimeSecondsValue",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "initialOwner",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "_defaultMinLoanAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "_defaultMaxLoanAmount",
-              type: "uint256",
             },
           ],
-          name: "initialize",
-          outputs: [],
-          stateMutability: "nonpayable",
+          name: "isGuaranteed",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -5174,19 +7392,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          name: "markLoanOverdue",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "",
               type: "address",
@@ -5435,58 +7640,6 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
-          name: "repay",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "uint16",
-              name: "walletReputation",
-              type: "uint16",
-            },
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "loanAmount",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "loanDurationBlocks",
-              type: "uint256",
-            },
-          ],
-          name: "submitLoanRequest",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "loanId",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
               internalType: "address",
               name: "newOwner",
               type: "address",
@@ -5655,36 +7808,14 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "withdrawLiquidity",
-          outputs: [],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "token",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "amount",
-              type: "uint256",
-            },
-          ],
           name: "withdrawProtocolFees",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
-        {
-          stateMutability: "payable",
-          type: "receive",
-        },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 9517582,
+      deployedOnBlock: 9924817,
     },
   },
   11155111: {

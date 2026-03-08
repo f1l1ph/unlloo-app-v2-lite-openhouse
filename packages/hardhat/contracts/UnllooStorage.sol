@@ -116,13 +116,11 @@ abstract contract UnllooStorage is Initializable, OwnableUpgradeable, Reentrancy
     mapping(address => mapping(address => uint256)) internal _guarantorIndex;
     /// @dev borrower => guarantor => bond details
     mapping(address => mapping(address => IUnlloo.GuaranteeBond)) public guaranteeBonds;
-    /// @notice Blocks after loan deadline before admin can seize a guarantor bond
-    uint256 public guarantorGracePeriodBlocks;
 
-    /// @dev Storage gap reduced from 35 to 28:
-    ///      -1 for extensionDelegate, -6 for guarantor state variables.
+    /// @dev Storage gap reduced from 35 to 29:
+    ///      -1 for extensionDelegate, -5 for guarantor state variables.
     ///      Decrement this count by 1 for each new state variable added above.
-    uint256[28] private __gap;
+    uint256[29] private __gap;
 
     // ============ Shared Internal Helpers ============
     // These are placed in UnllooStorage so both Core and Ext can call them directly

@@ -776,13 +776,11 @@ interface IUnlloo {
     //                     GUARANTOR TYPES
     // =============================================================
 
-    /// @notice A guarantor's collateral bond backing a specific borrower
+    /// @notice Tracks a guarantor's commitment to back a borrower
+    /// @dev No collateral is locked — guarantor pays from their own wallet when needed
     struct GuaranteeBond {
         address guarantor;
         address borrower;
-        address token;
-        uint256 lockedAmount;       // Collateral held by the contract
-        uint256 maxCoverageAmount;  // Max loan amount this bond covers
         bool active;
     }
 
@@ -791,38 +789,20 @@ interface IUnlloo {
     event GuaranteeRegistered(
         address indexed guarantor,
         address indexed borrower,
-        address token,
-        uint256 collateralAmount,
-        uint256 maxCoverageAmount,
         uint256 blockNumber
     );
 
     event GuaranteeRemoved(
         address indexed guarantor,
         address indexed borrower,
-        uint256 collateralReturned,
         uint256 blockNumber
     );
 
-    event GuarantorCoveredDebt(
+    event GuarantorPaidOnBehalf(
         uint256 indexed loanId,
         address indexed guarantor,
         address indexed borrower,
-        uint256 amountCovered,
-        uint256 blockNumber
-    );
-
-    event GuarantorBondSeized(
-        uint256 indexed loanId,
-        address indexed guarantor,
-        address indexed borrower,
-        uint256 amountSeized,
-        uint256 blockNumber
-    );
-
-    event GuarantorGracePeriodUpdated(
-        uint256 oldGracePeriodBlocks,
-        uint256 newGracePeriodBlocks,
+        uint256 amountPaid,
         uint256 blockNumber
     );
 
@@ -830,26 +810,17 @@ interface IUnlloo {
     //                     GUARANTOR FUNCTIONS
     // =============================================================
 
-    /// @notice Guarantor locks collateral to back a borrower
-    /// @dev collateralAmount must be >= maxCoverageAmount (100% coverage required)
-    function registerGuarantee(address borrower, address token, uint256 collateralAmount, uint256 maxCoverageAmount) external;
+    /// @notice Register as a guarantor for a borrower (no collateral required)
+    function registerGuarantee(address borrower) external;
 
-    /// @notice Guarantor removes their bond (only if borrower has no active/unpaid loan)
+    /// @notice Remove guarantee (only if borrower has no active/unpaid loan)
     function removeGuarantee(address borrower) external;
 
-    /// @notice Guarantor voluntarily covers a defaulted borrower's outstanding debt
-    function guarantorCoverDebt(uint256 loanId) external;
-
-    /// @notice Admin seizes guarantor bond after grace period expires
-    function seizeGuarantorBond(uint256 loanId, address guarantor) external;
-
-    /// @notice Admin updates the grace period before bond seizure is allowed
-    function updateGuarantorGracePeriod(uint256 newGracePeriodBlocks) external;
+    /// @notice Guarantor pays on behalf of a borrower — tokens pulled from guarantor's wallet
+    function payOnBehalf(uint256 loanId, uint256 amount) external;
 
     function getGuaranteeBond(address borrower, address guarantor) external view returns (GuaranteeBond memory);
     function getGuarantorsForBorrower(address borrower) external view returns (address[] memory);
     function getGuaranteesByGuarantor(address guarantor) external view returns (address[] memory borrowers);
     function isGuaranteed(address borrower) external view returns (bool);
-    function getTotalLockedByGuarantor(address guarantor, address token) external view returns (uint256);
-    function guarantorGracePeriodBlocks() external view returns (uint256);
 }

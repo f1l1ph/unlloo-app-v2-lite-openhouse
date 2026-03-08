@@ -111,48 +111,12 @@ export const LoanRequestModal: React.FC<LoanRequestModalProps> = ({
 
   const selectedTokenAddress = selectedTokenInfo?.address;
 
-  // Fetch token USD price for selected asset (via backend CoinGecko)
+  // DEV: CoinGecko pricing disabled — hardcoded to $1.00 (1 token = $1 USD)
   useEffect(() => {
-    const loadPrice = async () => {
-      if (!selectedTokenAddress) return;
-      setIsPriceLoading(true);
-      setPriceError(null);
-
-      try {
-        const chainId = publicClient?.chain?.id;
-        const supportedChain = supportedChainFromChainId(chainId);
-        if (!supportedChain) {
-          setTokenUsdPriceE6(null);
-          setTokenUsdPrice(null);
-          setPriceError("Unsupported network for Coingecko pricing (only mainnets supported).");
-          return;
-        }
-
-        const res = await getTokenUsdPrice({
-          chain: supportedChain,
-          tokenAddress: selectedTokenAddress,
-          chainId,
-        });
-
-        if (!res.usdPriceE6 || res.usdPriceE6 <= 0) {
-          setTokenUsdPriceE6(null);
-          setTokenUsdPrice(null);
-          setPriceError("Unable to fetch token USD price.");
-          return;
-        }
-
-        setTokenUsdPriceE6(BigInt(res.usdPriceE6));
-        setTokenUsdPrice(res.usdPrice);
-      } catch (e: any) {
-        setTokenUsdPriceE6(null);
-        setTokenUsdPrice(null);
-        setPriceError(e?.message || "Unable to fetch token USD price.");
-      } finally {
-        setIsPriceLoading(false);
-      }
-    };
-
-    void loadPrice();
+    if (!selectedTokenAddress) return;
+    setTokenUsdPriceE6(1_000_000n);
+    setTokenUsdPrice(1.0);
+    setPriceError(null);
   }, [selectedTokenAddress, publicClient?.chain?.id]);
 
   // Check if user can submit a request (cooldown, active loans, etc.)
